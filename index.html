@@ -3,23 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <script src="https://www.gstatic.com/firebasejs/9.4.0/firebase-app.js">import { initializeApp } from "firebase/app";
-import { getAnalytics } from "firebase/analytics";
-const firebaseConfig = {
-  apiKey: "AIzaSyAjBQR3CIyFe2B3X764vUAlgZBBv6MXWxU",
-  authDomain: "spelling-f0a67.firebaseapp.com",
-  projectId: "spelling-f0a67",
-  storageBucket: "spelling-f0a67.appspot.com",
-  messagingSenderId: "417568436363",
-  appId: "1:417568436363:web:f2815fd681ccfaf640a48e",
-  measurementId: "G-82924CD1JX"
-};
-
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-const analytics = getAnalytics(app);</script>
+  <script src="https://www.gstatic.com/firebasejs/9.4.0/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.4.0/firebase-database.js"></script>
-
   <title>Random Word Generator</title>
   <style>
     body {
@@ -106,14 +91,20 @@ const analytics = getAnalytics(app);</script>
 </table>
 
 <script>
-// Import the functions you need from the SDKs you need
+const firebaseConfig = {
+  apiKey: "AIzaSyAjBQR3CIyFe2B3X764vUAlgZBBv6MXWxU",
+  authDomain: "spelling-f0a67.firebaseapp.com",
+  projectId: "spelling-f0a67",
+  storageBucket: "spelling-f0a67.appspot.com",
+  messagingSenderId: "417568436363",
+  appId: "1:417568436363:web:f2815fd681ccfaf640a48e",
+  measurementId: "G-82924CD1JX"
+};
 
-// TODO: Add SDKs for Firebase products that you want to use
-// https://firebase.google.com/docs/web/setup#available-libraries
 
-// Your web app's Firebase configuration
-// For Firebase JS SDK v7.20.0 and later, measurementId is optional
-
+  // Initialize Firebase
+  const firebaseApp = firebase.initializeApp(firebaseConfig);
+  const db = firebaseApp.database();
 
   const primaryWords = ["again", "although", "answer", "any", "are", "become", "been", "both", "bought", "catch",
                         "climbed", "color", "come", "could", "country", "do", "does", "door", "earth", "edge",

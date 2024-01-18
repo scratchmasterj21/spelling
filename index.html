@@ -91,6 +91,7 @@
 
 <script type="module">
   import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.4.0/firebase-app.js';
+  import { getDatabase } from 'https://www.gstatic.com/firebasejs/9.4.0/firebase-database.js';
 
 
 const firebaseConfig = {
@@ -141,7 +142,7 @@ const firebaseConfig = {
 
     usedWords[selectedCategory].push(randomWord);
 
-    const db = firebaseApp.database();
+    const db = getDatabase(firebaseApp);
     db.ref(`${selectedCategory}/usedWords`).set(usedWords[selectedCategory]);
 
     document.getElementById("randomWord").innerHTML = `<h1>${randomWord}</h1>`;

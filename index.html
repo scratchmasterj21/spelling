@@ -1,41 +1,10 @@
 <!DOCTYPE html>
-<html>
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Welcome to Firebase Hosting</title>
-
-    <!-- update the version number as needed -->
-    <script defer src="/__/firebase/10.7.1/firebase-app-compat.js"></script>
-    <!-- include only the Firebase features as you need -->
-    <script defer src="/__/firebase/10.7.1/firebase-auth-compat.js"></script>
-    <script defer src="/__/firebase/10.7.1/firebase-database-compat.js"></script>
-    <script defer src="/__/firebase/10.7.1/firebase-firestore-compat.js"></script>
-    <script defer src="/__/firebase/10.7.1/firebase-functions-compat.js"></script>
-    <script defer src="/__/firebase/10.7.1/firebase-messaging-compat.js"></script>
-    <script defer src="/__/firebase/10.7.1/firebase-storage-compat.js"></script>
-    <script defer src="/__/firebase/10.7.1/firebase-analytics-compat.js"></script>
-    <script defer src="/__/firebase/10.7.1/firebase-remote-config-compat.js"></script>
-    <script defer src="/__/firebase/10.7.1/firebase-performance-compat.js"></script>
-    <!-- 
-      initialize the SDK after all desired features are loaded, set useEmulator to false
-      to avoid connecting the SDK to running emulators.
-    -->
-    <script defer src="/__/firebase/init.js?useEmulator=true"></script>
-
-    <style media="screen">
-      body { background: #ECEFF1; color: rgba(0,0,0,0.87); font-family: Roboto, Helvetica, Arial, sans-serif; margin: 0; padding: 0; }
-      #message { background: white; max-width: 360px; margin: 100px auto 16px; padding: 32px 24px; border-radius: 3px; }
-      #message h2 { color: #ffa100; font-weight: bold; font-size: 16px; margin: 0 0 8px; }
-      #message h1 { font-size: 22px; font-weight: 300; color: rgba(0,0,0,0.6); margin: 0 0 16px;}
-      #message p { line-height: 140%; margin: 16px 0 24px; font-size: 14px; }
-      #message a { display: block; text-align: center; background: #039be5; text-transform: uppercase; text-decoration: none; color: white; padding: 16px; border-radius: 4px; }
-      #message, #message a { box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24); }
-      #load { color: rgba(0,0,0,0.4); text-align: center; font-size: 13px; }
-      @media (max-width: 600px) {
-        body, #message { margin-top: 0; background: white; box-shadow: none; }
-        body { border-top: 16px solid #ffa100; }
-      }
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Random Word Generator</title>
+  <style>
     body {
       font-family: Arial, sans-serif;
       text-align: center;
@@ -70,12 +39,10 @@
     #definition {
       margin-top: 20px;
     }
+  </style>
+</head>
+<body>
 
-
-
-    </style>
-  </head>
-  <body>
 <h1>Random Word Generator</h1>
 <input type="radio" name="category" value="primary" id="primaryRadio" checked onclick="updateCategory()"> 
   <label for="primaryRadio">Primary</label>
@@ -83,12 +50,13 @@
   <label for="intermediateRadio">Intermediate</label>
 
 <button onclick="generateRandomWord()">Generate Random Word</button>
+<button onclick="resetUsedWords()">Reset Used Words</button>
 <p id="randomWord" onclick="showDefinition()"></p>
 <div id="definition" class="hidden">
   <h3>Definitions</h3>
-  <ul id="wordDefinitions"></ul>
+  <table id="wordDefinitions"></table>
   <h3>Examples</h3>
-  <ul id="wordExamples"></ul>
+  <table id="wordExamples"></table>
 </div>
 
 <h2>Word Lists</h2>
@@ -120,47 +88,25 @@
   <tbody id="intermediateList"></tbody>
 </table>
 
-    <script>
-      document.addEventListener('DOMContentLoaded', function() {
-        const loadEl = document.querySelector('#load');
-        // // 🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥
-        // // The Firebase SDK is initialized and available here!
-        //
-        // firebase.auth().onAuthStateChanged(user => { });
-        // firebase.database().ref('/path/to/ref').on('value', snapshot => { });
-        // firebase.firestore().doc('/foo/bar').get().then(() => { });
-        // firebase.functions().httpsCallable('yourFunction')().then(() => { });
-        // firebase.messaging().requestPermission().then(() => { });
-        // firebase.storage().ref('/path/to/ref').getDownloadURL().then(() => { });
-        // firebase.analytics(); // call to activate
-        // firebase.analytics().logEvent('tutorial_completed');
-        // firebase.performance(); // call to activate
-        //
-        // // 🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥
-
-        try {
-          let app = firebase.app();
-          let features = [
-            'auth', 
-            'database', 
-            'firestore',
-            'functions',
-            'messaging', 
-            'storage', 
-            'analytics', 
-            'remoteConfig',
-            'performance',
-          ].filter(feature => typeof app[feature] === 'function');
-          loadEl.textContent = `Firebase SDK loaded with ${features.join(', ')}`;
-        } catch (e) {
-          console.error(e);
-          loadEl.textContent = 'Error loading the Firebase SDK, check the console.';
-        }
-      });
-    </script>
+<script src="https://www.gstatic.com/firebasejs/9.4.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.4.0/firebase-database.js"></script>
 
 <script>
-  // New primary and intermediate words
+// Your web app's Firebase configuration
+// For Firebase JS SDK v7.20.0 and later, measurementId is optional
+const firebaseConfig = {
+  apiKey: "AIzaSyAjBQR3CIyFe2B3X764vUAlgZBBv6MXWxU",
+  authDomain: "spelling-f0a67.firebaseapp.com",
+  projectId: "spelling-f0a67",
+  storageBucket: "spelling-f0a67.appspot.com",
+  messagingSenderId: "417568436363",
+  appId: "1:417568436363:web:f2815fd681ccfaf640a48e",
+  measurementId: "G-82924CD1JX"
+};
+
+  // Initialize Firebase
+  firebase.initializeApp(firebaseConfig);
+
   const primaryWords = ["again", "although", "answer", "any", "are", "become", "been", "both", "bought", "catch",
                         "climbed", "color", "come", "could", "country", "do", "does", "door", "earth", "edge",
                         "eight", "enough", "example", "eyes", "father", "few", "find", "four", "friend", "from",
@@ -178,42 +124,43 @@
                              "consequence", "archives", "conquered", "obsolete", "tolerance", "electronically",
                              "dialect", "neutron", "initially", "archaic", "inspiration", "contemporary"];
 
-  let selectedCategory = "primary"; // Default category
+  let selectedCategory = "primary";
   const usedWords = { primary: [], intermediate: [] };
 
-  // Function to generate a random word
   function generateRandomWord() {
-    // Determine the category based on the selected radio button
     const currentCategory = selectedCategory === "primary" ? primaryWords : intermediateWords;
 
-    // Check if all words have been used in the selected category
     if (usedWords[selectedCategory].length === currentCategory.length) {
-      document.getElementById("randomWord").textContent = "All words have been used!";
+      document.getElementById("randomWord").innerHTML = "<h1>All words have been used!</h1>";
       return;
     }
 
-    // Get a random index for the remaining words
     const remainingWords = currentCategory.filter(word => !usedWords[selectedCategory].includes(word));
     const randomIndex = Math.floor(Math.random() * remainingWords.length);
-
-    // Get the word at the random index
     const randomWord = remainingWords[randomIndex];
 
-    // Mark the chosen word as used
     usedWords[selectedCategory].push(randomWord);
 
-    // Display the random word
+    const db = firebase.database();
+    db.ref(`${selectedCategory}/usedWords`).set(usedWords[selectedCategory]);
+
     document.getElementById("randomWord").innerHTML = `<h1>${randomWord}</h1>`;
 
-    // Hide definition and example
     document.getElementById("definition").classList.add("hidden");
-
-    // Update the word list display
     updateWordList();
   }
 
-  // Function to update the word list display
-    // Function to update the word list display and count
+  function resetUsedWords() {
+    usedWords.primary = [];
+    usedWords.intermediate = [];
+
+    const db = firebase.database();
+    db.ref("primary/usedWords").set([]);
+    db.ref("intermediate/usedWords").set([]);
+
+    updateWordList();
+  }
+
   function updateWordList() {
     const primaryTable = document.getElementById("primaryTable");
     const intermediateTable = document.getElementById("intermediateTable");
@@ -224,7 +171,7 @@
     primaryTable.classList.toggle("hidden", selectedCategory !== "primary");
     intermediateTable.classList.toggle("hidden", selectedCategory !== "intermediate");
 
-    primaryListContainer.innerHTML = ""; // Clear the current list
+    primaryListContainer.innerHTML = "";
     intermediateListContainer.innerHTML = "";
 
     const currentWords = selectedCategory === "primary" ? primaryWords : intermediateWords;
@@ -258,96 +205,98 @@
       }
     }
 
-    // Display the number of words left and total number of words for each category
-    const numWordsLeft = currentWords.length - usedWords[selectedCategory].length;
-    document.getElementById("numWordsLeft").textContent = `Words Left: ${numWordsLeft}`;
-    document.getElementById("totalNumWords").textContent = `Total Words: ${currentWords.length}`;
+    updateWordCount();
   }
 
-  // Function to update the selected category
+  function updateWordCount() {
+    const numWordsLeft = primaryWords.length - usedWords.primary.length;
+    const totalNumWords = primaryWords.length;
+
+    document.getElementById("numWordsLeft").textContent = `Words Left: ${numWordsLeft}`;
+    document.getElementById("totalNumWords").textContent = `Total Words: ${totalNumWords}`;
+  }
+
   function updateCategory() {
     selectedCategory = document.querySelector('input[name="category"]:checked').value;
     updateWordList();
   }
 
-  // Function to show the definition and example
   function showDefinition() {
     const randomWord = document.getElementById("randomWord").textContent;
 
-    // Fetch definition and example from WordsAPI
     fetch(`https://wordsapiv1.p.rapidapi.com/words/${randomWord}`, {
       method: "GET",
       headers: {
         "X-RapidAPI-Host": "wordsapiv1.p.rapidapi.com",
-        "X-RapidAPI-Key": "06f20456cfmsh1b8e00ea9fb360dp1243b0jsn77475ae1802e" // Replace with your WordsAPI key
+        "X-RapidAPI-Key": "06f20456cfmsh1b8e00ea9fb360dp1243b0jsn77475ae1802e"
       }
     })
-      .then(response => response.json())
-      .then(data => {
-        if (data && data.results && data.results.length > 0) {
-          const definitions = data.results.map(result => result.definition).filter(Boolean);
-          const examples = data.results.map(result => result.examples).flat().filter(Boolean);
+    .then(response => response.json())
+    .then(data => {
+      if (data && data.results && data.results.length > 0) {
+        const definitions = data.results.map(result => result.definition).filter(Boolean);
+        const examples = data.results.map(result => result.examples).flat().filter(Boolean);
 
-          // Check if there are definitions and examples available
-          if (definitions.length > 0 || examples.length > 0) {
-            // Show the definitions and examples
-            showDefinitionAndExamples(definitions, examples);
-          } else {
-            // If no definitions or examples, display a message
-            document.getElementById("definition").classList.remove("hidden");
-            document.getElementById("wordDefinitions").innerHTML = "<li>No definitions available.</li>";
-            document.getElementById("wordExamples").innerHTML = "<li>No examples available.</li>";
-          }
-        } else {
-          // If the data structure is unexpected, display a message
-          document.getElementById("definition").classList.remove("hidden");
-          document.getElementById("wordDefinitions").innerHTML = "<li>No definitions available.</li>";
-          document.getElementById("wordExamples").innerHTML = "<li>No examples available.</li>";
-        }
-      })
-      .catch(error => {
-        console.error("Error fetching data from WordsAPI:", error);
+        showDefinitionAndExamples(definitions, examples);
+      } else {
         document.getElementById("definition").classList.remove("hidden");
-        document.getElementById("wordDefinitions").innerHTML = "<li>Error fetching data from WordsAPI.</li>";
-        document.getElementById("wordExamples").innerHTML = "<li>Error fetching data from WordsAPI.</li>";
-      });
+        document.getElementById("wordDefinitions").innerHTML = "<tr><td>No definitions available.</td></tr>";
+        document.getElementById("wordExamples").innerHTML = "<tr><td>No examples available.</td></tr>";
+      }
+    })
+    .catch(error => {
+      console.error("Error fetching data from WordsAPI:", error);
+    });
   }
 
-  // Function to display definitions and examples in a table
   function showDefinitionAndExamples(definitions, examples) {
-    const wordDefinitions = document.getElementById("wordDefinitions");
-    const wordExamples = document.getElementById("wordExamples");
+    const wordDefinitionsContainer = document.getElementById("wordDefinitions");
+    const wordExamplesContainer = document.getElementById("wordExamples");
 
-    // Clear previous content
-    wordDefinitions.innerHTML = "";
-    wordExamples.innerHTML = "";
+    wordDefinitionsContainer.innerHTML = "";
+    wordExamplesContainer.innerHTML = "";
 
-    // Display one definition in a table
-    if (definitions.length > 0) {
-      const definitionTable = document.createElement("table");
-      const definitionRow = definitionTable.insertRow();
-      const definitionCell = definitionRow.insertCell();
-      definitionCell.textContent = `${definitions[0]}`;
-      wordDefinitions.appendChild(definitionTable);
+    for (const definition of definitions) {
+      const tr = document.createElement("tr");
+      const td = document.createElement("td");
+      td.textContent = definition;
+      tr.appendChild(td);
+      wordDefinitionsContainer.appendChild(tr);
     }
 
-    // Display five examples in a table
-    if (examples.length > 0) {
-      const exampleTable = document.createElement("table");
-      examples.slice(0, 5).forEach((example, index) => {
-        const exampleRow = exampleTable.insertRow();
-        const exampleCell = exampleRow.insertCell();
-        exampleCell.textContent = `Ex. ${index + 1}: ${example}`;
-      });
-      wordExamples.appendChild(exampleTable);
+    for (const example of examples.slice(0, 5)) {
+      const tr = document.createElement("tr");
+      const td = document.createElement("td");
+      td.textContent = example;
+      tr.appendChild(td);
+      wordExamplesContainer.appendChild(tr);
     }
 
-    // Show the definition and examples
     document.getElementById("definition").classList.remove("hidden");
   }
+
+  // Subscribe to changes in the Firebase database on page load
+  const db = firebase.database();
+
+  db.ref("primary/usedWords").on('value', snapshot => {
+    const usedWordsFromFirebase = snapshot.val();
+    if (usedWordsFromFirebase) {
+      usedWords.primary = usedWordsFromFirebase;
+    }
+    updateWordList();
+  });
+
+  db.ref("intermediate/usedWords").on('value', snapshot => {
+    const usedWordsFromFirebase = snapshot.val();
+    if (usedWordsFromFirebase) {
+      usedWords.intermediate = usedWordsFromFirebase;
+    }
+    updateWordList();
+  });
+
   // Initial update of the word list
   updateWordList();
 </script>
 
-  </body>
+</body>
 </html>

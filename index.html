@@ -277,7 +277,7 @@ const firebaseConfig = {
   }
 
   // Subscribe to changes in the Firebase database on page load
-  const db = firebase.database();
+  const db = getDatabase(firebaseApp);
 
   db.ref("primary/usedWords").on('value', snapshot => {
     const usedWordsFromFirebase = snapshot.val();

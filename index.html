@@ -155,7 +155,7 @@ const firebaseConfig = {
     usedWords.primary = [];
     usedWords.intermediate = [];
 
-    const db = firebase.database();
+    const db = getDatabase(firebaseApp);
     db.ref("primary/usedWords").set([]);
     db.ref("intermediate/usedWords").set([]);
 

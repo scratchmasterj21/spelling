@@ -275,15 +275,12 @@ function updateWordList() {
         return;
     }
 
-    // Hide all tables and show the selected one
+    // Hide all tables
     document.querySelectorAll('table[id^="level"]').forEach(table => {
         table.classList.add("hidden");
     });
-    
-    if (selectedLevel !== "extraWords") {
-        currentTable.classList.remove("hidden");
-    }
 
+    currentTable.classList.remove("hidden");
     currentListContainer.innerHTML = "";
 
     const currentWords = getWordsForLevel(selectedLevel);
@@ -321,6 +318,7 @@ function updateWordList() {
 
     updateWordCount();
 }
+
 
 
 

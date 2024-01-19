@@ -275,7 +275,12 @@ function generateRandomWord() {
         return;
     }
 
-    currentTable.classList.toggle("hidden", selectedLevel !== "extraWords");
+    // Hide all tables and show the selected one
+    document.querySelectorAll('table[id^="level"]').forEach(table => {
+        table.classList.add("hidden");
+    });
+    currentTable.classList.remove("hidden");
+
     currentListContainer.innerHTML = "";
 
     const currentWords = getWordsForLevel(selectedLevel);

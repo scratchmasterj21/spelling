@@ -142,7 +142,9 @@ const firebaseConfig = {
 
     usedWords[selectedCategory].push(randomWord);
 
-    const db = getDatabase(firebaseApp);
+    const database = getDatabase(firebaseApp);
+    const db = ref(database);
+
     db.ref(`${selectedCategory}/usedWords`).set(usedWords[selectedCategory]);
 
     document.getElementById("randomWord").innerHTML = `<h1>${randomWord}</h1>`;
@@ -155,7 +157,9 @@ const firebaseConfig = {
     usedWords.primary = [];
     usedWords.intermediate = [];
 
-    const db = getDatabase(firebaseApp);
+    const database = getDatabase(firebaseApp);
+    const db = ref(database);
+    
     db.ref("primary/usedWords").set([]);
     db.ref("intermediate/usedWords").set([]);
 
@@ -277,8 +281,8 @@ const firebaseConfig = {
   }
 
   // Subscribe to changes in the Firebase database on page load
-  const db = getDatabase(firebaseApp);
-
+  const database = getDatabase(firebaseApp);
+  const db = ref(database);
   db.ref("primary/usedWords").on('value', snapshot => {
     const usedWordsFromFirebase = snapshot.val();
     if (usedWordsFromFirebase) {

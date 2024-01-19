@@ -132,17 +132,6 @@ const firebaseConfig = {
   let selectedCategory = "primary";
   const usedWords = { primary: [], intermediate: [] };
 
-function getCurrentWord() {
-  const currentWordRef = ref(db, `${selectedCategory}/currentWord`);
-
-  // Set an initial value for currentWord if it doesn't exist
-  set(currentWordRef, null);
-
-  onValue(currentWordRef, snapshot => {
-    const currentWord = snapshot.val();
-    document.getElementById("randomWord").innerHTML = `<h1>${currentWord || 'Click to generate a word'}</h1>`;
-  });
-}
 
   function generateRandomWord() {
     const currentCategory = selectedCategory === "primary" ? primaryWords : intermediateWords;
@@ -164,9 +153,6 @@ function getCurrentWord() {
     const randomWord = remainingWords[randomIndex];
 
     usedWords[selectedCategory].push(randomWord);
-
-
-    set(ref(db, `${selectedCategory}/currentWord`), randomWord);
 
     // Simplified Firebase Realtime Database update
     set(ref(db, `${selectedCategory}/usedWords`), usedWords[selectedCategory]);
@@ -324,9 +310,31 @@ function updateWordCount() {
     updateWordList();
   });
 
+ onValue(ref(db, "primary/usedWords"), snapshot => {
+    const usedWordsFromFirebase = snapshot.val();
+    if (usedWordsFromFirebase) {
+      usedWords.primary = usedWordsFromFirebase;
+      // Display only the latest inserted word on load
+      if (usedWords.primary.length > 0) {
+        const latestWord = usedWords.primary[usedWords.primary.length - 1];
+        document.getElementById("randomWord").innerHTML = `<h1>${latestWord}</h1>`;
+      }
+    }
+    updateWordList();
+  });
 
-// Call this function to get the current word from Firebase on page load
-getCurrentWord();
+  onValue(ref(db, "intermediate/usedWords"), snapshot => {
+    const usedWordsFromFirebase = snapshot.val();
+    if (usedWordsFromFirebase) {
+      usedWords.intermediate = usedWordsFromFirebase;
+      // Display only the latest inserted word on load
+      if (usedWords.intermediate.length > 0) {
+        const latestWord = usedWords.intermediate[usedWords.intermediate.length - 1];
+        document.getElementById("randomWord").innerHTML = `<h1>${latestWord}</h1>`;
+      }
+    }
+    updateWordList();
+  });
 
   // Initial update of the word list
   updateWordList();

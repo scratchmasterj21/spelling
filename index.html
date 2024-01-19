@@ -463,10 +463,10 @@ function updateWordCount() {
       const usedWordsFromFirebase = snapshot.val();
       if (usedWordsFromFirebase) {
         usedWords[level] = usedWordsFromFirebase;
-              if (usedWords[level].length > 0) {
-        const latestWord = usedWords[level].[usedWords[level].length - 1];
-        document.getElementById("randomWord").innerHTML = `<h1>${latestWord}</h1>`;
-      }
+            if (usedWords[level].length > 0) {
+                const latestWord = usedWords[level][usedWords[level].length - 1];
+                document.getElementById("randomWord").innerHTML = `<h1>${latestWord}</h1>`;
+            }
       }
       updateWordList();
     });

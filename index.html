@@ -266,7 +266,7 @@ function generateRandomWord() {
     updateWordList();
   }
 
-  function updateWordList() {
+ function updateWordList() {
     const currentTable = getTableForLevel(selectedLevel);
     const currentListContainer = getListContainerForLevel(selectedLevel);
 
@@ -275,12 +275,7 @@ function generateRandomWord() {
         return;
     }
 
-    // Hide all tables and show the selected one
-    document.querySelectorAll('table[id^="level"]').forEach(table => {
-        table.classList.add("hidden");
-    });
-    currentTable.classList.remove("hidden");
-
+    // Clear the table content
     currentListContainer.innerHTML = "";
 
     const currentWords = getWordsForLevel(selectedLevel);
@@ -318,6 +313,7 @@ function generateRandomWord() {
 
     updateWordCount();
 }
+
 
 function getWordsForLevel(level) {
     switch (level) {

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Random Word Generator</title>
+  <title>Random Word Selector</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -43,11 +43,19 @@
 </head>
 <body>
 
-<h1>Random Word Generator</h1>
-<input type="radio" name="category" value="primary" id="primaryRadio" checked onclick="updateCategory()"> 
-  <label for="primaryRadio">Primary</label>
-<input type="radio" name="category" value="intermediate" id="intermediateRadio" onclick="updateCategory()"> 
-  <label for="intermediateRadio">Intermediate</label>
+<h1>Random Word Selector</h1>
+<input type="radio" name="level" value="level1" id="level1Radio" checked onclick="updateCategory()"> 
+  <label for="level1Radio">Level 1</label>
+<input type="radio" name="level" value="level2" id="level2Radio" onclick="updateCategory()"> 
+  <label for="level2Radio">Level 2</label>
+<input type="radio" name="level" value="level3" id="level3Radio" onclick="updateCategory()"> 
+  <label for="level3Radio">Level 3</label>
+<input type="radio" name="level" value="level4" id="level4Radio" onclick="updateCategory()"> 
+  <label for="level4Radio">Level 4</label>
+<input type="radio" name="level" value="level5" id="level5Radio" onclick="updateCategory()"> 
+  <label for="level5Radio">Level 5</label>
+<input type="radio" name="level" value="extra" id="extraRadio" onclick="updateCategory()"> 
+  <label for="extraRadio">Extra Words</label>
 
 <button onclick="generateRandomWord()">Generate Random Word</button>
 <button onclick="resetUsedWords()">Reset Used Words</button>
@@ -62,7 +70,7 @@
 <h2>Word Lists</h2>
 <p id="numWordsLeft">Words Left: 0</p>
 <p id="totalNumWords">Total Words: 0</p>
-<table id="primaryTable" class="hidden">
+<table id="level1Table" class="hidden">
   <thead>
     <tr>
       <th>Column 1</th>
@@ -72,21 +80,10 @@
       <th>Column 5</th>
     </tr>
   </thead>
-  <tbody id="primaryList"></tbody>
+  <tbody id="level1List"></tbody>
 </table>
 
-<table id="intermediateTable" class="hidden">
-  <thead>
-    <tr>
-      <th>Column 1</th>
-      <th>Column 2</th>
-      <th>Column 3</th>
-      <th>Column 4</th>
-      <th>Column 5</th>
-    </tr>
-  </thead>
-  <tbody id="intermediateList"></tbody>
-</table>
+<!-- Add similar tables for other levels -->
 
 <script type="module">
   import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.4.0/firebase-app.js';
@@ -112,36 +109,35 @@ const firebaseConfig = {
   const firebaseApp = initializeApp(firebaseConfig);
   const db = getDatabase(firebaseApp);
 
-  const primaryWords = ["again", "although", "answer", "any", "are", "become", "been", "both", "bought", "catch",
-                        "climbed", "color", "come", "could", "country", "do", "does", "door", "earth", "edge",
-                        "eight", "enough", "example", "eyes", "father", "few", "find", "four", "friend", "from",
-                        "give", "great", "group", "have", "heard", "island", "kind", "knew", "know", "learn", "listen",
-                        "live", "many", "measure", "most", "mother", "move", "night", "off", "often", "old", "on",
-                        "once", "one", "only", "other", "people", "picture", "piece", "quickly", "right", "said",
-                        "science", "should", "sign", "snow", "some", "straight", "stretch", "sure", "talk", "their",
-                        "there", "they", "though", "thought", "through", "to", "today", "two", "usually", "walk",
-                        "want", "was", "watch", "water", "were", "what", "where", "who", "women", "word", "work",
-                        "world", "would", "write", "wrote", "you", "young", "your"];
+  // Define words for each level
+  const levelWords = {
+    level1: ["word1", "word2", "word3", /*...*/],
+    level2: ["word4", "word5", "word6", /*...*/],
+    level3: ["word7", "word8", "word9", /*...*/],
+    level4: ["word10", "word11", "word12", /*...*/],
+    level5: ["word13", "word14", "word15", /*...*/],
+    extra: ["extra1", "extra2", "extra3", /*...*/],
+  };
 
-  const intermediateWords = ["ineffectual", "philosophy", "resurgence", "phenomena", "simultaneous", "temporarily",
-                             "vocabulary", "ploughman", "yacht", "empirical", "deficient", "charismatic",
-                             "alias", "borough", "circumstance", "ethos", "inheritance", "monarchy",
-                             "consequence", "archives", "conquered", "obsolete", "tolerance", "electronically",
-                             "dialect", "neutron", "initially", "archaic", "inspiration", "contemporary"];
-
-  let selectedCategory = "primary";
-  const usedWords = { primary: [], intermediate: [] };
-
+  let selectedLevel = "level1";
+  const usedWords = {
+    level1: [],
+    level2: [],
+    level3: [],
+    level4: [],
+    level5: [],
+    extra: [],
+  };
 
   function generateRandomWord() {
-    const currentCategory = selectedCategory === "primary" ? primaryWords : intermediateWords;
+    const currentLevel = levelWords[selectedLevel];
 
-    if (usedWords[selectedCategory].length === currentCategory.length) {
+    if (usedWords[selectedLevel].length === currentLevel.length) {
       document.getElementById("randomWord").innerHTML = "<h1>All words have been used!</h1>";
       return;
     }
 
-    const remainingWords = currentCategory.filter(word => !usedWords[selectedCategory].includes(word));
+    const remainingWords = currentLevel.filter(word => !usedWords[selectedLevel].includes(word));
 
     if (remainingWords.length === 0) {
       // All words have been used after filtering, update UI accordingly
@@ -152,10 +148,10 @@ const firebaseConfig = {
     const randomIndex = Math.floor(Math.random() * remainingWords.length);
     const randomWord = remainingWords[randomIndex];
 
-    usedWords[selectedCategory].push(randomWord);
+    usedWords[selectedLevel].push(randomWord);
 
     // Simplified Firebase Realtime Database update
-    set(ref(db, `${selectedCategory}/usedWords`), usedWords[selectedCategory]);
+    set(ref(db, `${selectedLevel}/usedWords`), usedWords[selectedLevel]);
 
     document.getElementById("randomWord").innerHTML = `<h1>${randomWord}</h1>`;
 
@@ -164,83 +160,82 @@ const firebaseConfig = {
   }
 
 function resetUsedWords() {
-    usedWords.primary = [];
-    usedWords.intermediate = [];
-
-    set(ref(db, "primary/usedWords"), []).then(() => {
+    Object.keys(usedWords).forEach(level => {
+      usedWords[level] = [];
+      set(ref(db, `${level}/usedWords`), []).then(() => {
         // Trigger update after the database is updated
         updateWordList();
-    });
-
-    set(ref(db, "intermediate/usedWords"), []).then(() => {
-        // Trigger update after the database is updated
-        updateWordList();
+      });
     });
 }
 
   function updateWordList() {
-    const primaryTable = document.getElementById("primaryTable");
-    const intermediateTable = document.getElementById("intermediateTable");
+    const levelTables = {
+      level1: document.getElementById("level1Table"),
+      level2: document.getElementById("level2Table"),
+      level3: document.getElementById("level3Table"),
+      level4: document.getElementById("level4Table"),
+      level5: document.getElementById("level5Table"),
+      extra: document.getElementById("extraTable"),
+    };
 
-    const primaryListContainer = document.getElementById("primaryList");
-    const intermediateListContainer = document.getElementById("intermediateList");
+    const levelListContainers = {
+      level1: document.getElementById("level1List"),
+      level2: document.getElementById("level2List"),
+      level3: document.getElementById("level3List"),
+      level4: document.getElementById("level4List"),
+      level5: document.getElementById("level5List"),
+      extra: document.getElementById("extraList"),
+    };
 
-    primaryTable.classList.toggle("hidden", selectedCategory !== "primary");
-    intermediateTable.classList.toggle("hidden", selectedCategory !== "intermediate");
+    Object.keys(levelTables).forEach(level => {
+      const currentTable = levelTables[level];
+      const currentListContainer = levelListContainers[level];
 
-    primaryListContainer.innerHTML = "";
-    intermediateListContainer.innerHTML = "";
+      currentTable.classList.toggle("hidden", selectedLevel !== level);
 
-    const currentWords = selectedCategory === "primary" ? primaryWords : intermediateWords;
-    const words = currentWords.sort();
-    const numColumns = 5;
-    const numRows = Math.ceil(words.length / numColumns);
+      currentListContainer.innerHTML = "";
 
-    for (let row = 0; row < numRows; row++) {
-      const tr = document.createElement("tr");
+      const currentWords = levelWords[level].sort();
+      const numColumns = 5;
+      const numRows = Math.ceil(currentWords.length / numColumns);
 
-      for (let col = 0; col < numColumns; col++) {
-        const index = row * numColumns + col;
-        if (index < words.length) {
-          const word = words[index];
-          const td = document.createElement("td");
+      for (let row = 0; row < numRows; row++) {
+        const tr = document.createElement("tr");
 
-          if (usedWords[selectedCategory].includes(word)) {
-            td.innerHTML = `<span class="used">${word}</span>`;
-          } else {
-            td.textContent = word;
+        for (let col = 0; col < numColumns; col++) {
+          const index = row * numColumns + col;
+          if (index < currentWords.length) {
+            const word = currentWords[index];
+            const td = document.createElement("td");
+
+            if (usedWords[level].includes(word)) {
+              td.innerHTML = `<span class="used">${word}</span>`;
+            } else {
+              td.textContent = word;
+            }
+
+            tr.appendChild(td);
           }
-
-          tr.appendChild(td);
         }
-      }
 
-      if (selectedCategory === "primary") {
-        primaryListContainer.appendChild(tr);
-      } else {
-        intermediateListContainer.appendChild(tr);
+        currentListContainer.appendChild(tr);
       }
-    }
+    });
 
     updateWordCount();
   }
 
 function updateWordCount() {
-  const numWordsLeft = selectedCategory === "primary" ?
-    primaryWords.length - usedWords.primary.length :
-    intermediateWords.length - usedWords.intermediate.length;
-
-  const totalNumWords = selectedCategory === "primary" ?
-    primaryWords.length :
-    intermediateWords.length;
+  const numWordsLeft = levelWords[selectedLevel].length - usedWords[selectedLevel].length;
+  const totalNumWords = levelWords[selectedLevel].length;
 
   document.getElementById("numWordsLeft").textContent = `Words Left: ${numWordsLeft}`;
   document.getElementById("totalNumWords").textContent = `Total Words: ${totalNumWords}`;
 }
 
-
   function updateCategory() {
-    selectedCategory = document.querySelector('input[name="category"]:checked').value;
+    selectedLevel = document.querySelector('input[name="level"]:checked').value;
     updateWordList();
   }
 
@@ -299,46 +294,14 @@ function updateWordCount() {
   }
 
   // Subscribe to changes in the Firebase database on page load
-  onValue(ref(db, "primary/usedWords"), snapshot => {
-    const usedWordsFromFirebase = snapshot.val();
-    if (usedWordsFromFirebase) {
-      usedWords.primary = usedWordsFromFirebase;
-    }
-    updateWordList();
-  });
-
-  onValue(ref(db, "intermediate/usedWords"), snapshot => {
-    const usedWordsFromFirebase = snapshot.val();
-    if (usedWordsFromFirebase) {
-      usedWords.intermediate = usedWordsFromFirebase;
-    }
-    updateWordList();
-  });
-
- onValue(ref(db, "primary/usedWords"), snapshot => {
-    const usedWordsFromFirebase = snapshot.val();
-    if (usedWordsFromFirebase) {
-      usedWords.primary = usedWordsFromFirebase;
-      // Display only the latest inserted word on load
-      if (usedWords.primary.length > 0) {
-        const latestWord = usedWords.primary[usedWords.primary.length - 1];
-        document.getElementById("randomWord").innerHTML = `<h1>${latestWord}</h1>`;
+  Object.keys(levelWords).forEach(level => {
+    onValue(ref(db, `${level}/usedWords`), snapshot => {
+      const usedWordsFromFirebase = snapshot.val();
+      if (usedWordsFromFirebase) {
+        usedWords[level] = usedWordsFromFirebase;
       }
-    }
-    updateWordList();
-  });
-
-  onValue(ref(db, "intermediate/usedWords"), snapshot => {
-    const usedWordsFromFirebase = snapshot.val();
-    if (usedWordsFromFirebase) {
-      usedWords.intermediate = usedWordsFromFirebase;
-      // Display only the latest inserted word on load
-      if (usedWords.intermediate.length > 0) {
-        const latestWord = usedWords.intermediate[usedWords.intermediate.length - 1];
-        document.getElementById("randomWord").innerHTML = `<h1>${latestWord}</h1>`;
-      }
-    }
-    updateWordList();
+      updateWordList();
+    });
   });
 
   // Initial update of the word list

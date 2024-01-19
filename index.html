@@ -110,8 +110,47 @@ const firebaseConfig = {
   const firebaseApp = initializeApp(firebaseConfig);
   const db = getDatabase(firebaseApp);
 
-  const level1Words = ["word1", "word2", "word3", /*...*/];
-  // Add similar arrays for other levels (level2Words, level3Words, etc.)
+const level1Words = [
+  "apple", "banana", "cherry", "dog", "elephant",
+  "flower", "guitar", "happy", "igloo", "jazz",
+  "kite", "lemon", "mountain", "notebook", "orange",
+  "puzzle", "rainbow", "sun", "tiger", "umbrella"
+];
+
+const level2Words = [
+  "bicycle", "cactus", "diamond", "eagle", "fountain",
+  "giraffe", "happiness", "ice cream", "jungle", "kiwi",
+  "lighthouse", "magnificent", "ocean", "parrot", "quilt",
+  "rocket", "sunset", "treasure", "volcano", "waterfall"
+];
+
+const level3Words = [
+  "astronomy", "breathtaking", "caterpillar", "dolphin", "elegant",
+  "fantastic", "gargantuan", "harmony", "illuminate", "jubilant",
+  "kaleidoscope", "luminous", "mysterious", "nostalgia", "orchestra",
+  "phenomenal", "quintessential", "serendipity", "tranquil", "universal"
+];
+
+const level4Words = [
+  "ambassador", "benevolent", "cynosure", "effervescent", "fortuitous",
+  "gallant", "hierarchical", "indomitable", "juxtapose", "kaleidoscopic",
+  "labyrinthine", "mellifluous", "nepotism", "obfuscate", "philanthropy",
+  "quizzical", "resplendent", "superfluous", "ubiquitous", "verisimilitude"
+];
+
+const level5Words = [
+  "acquiesce", "belligerent", "cacophony", "deleterious", "ephemeral",
+  "facetious", "gregarious", "hirsute", "iconoclast", "juxtaposition",
+  "kowtow", "lugubrious", "mellifluous", "nonchalant", "obfuscate",
+  "paradigm", "quixotic", "recalcitrant", "sycophant", "ubiquitous"
+];
+
+const extraWords = [
+  "effulgent", "bibliopole", "susurrus", "gallimaufry", "discombobulate",
+  "limerence", "recumbentibus", "sesquipedalian", "vicissitude", "mellisonant",
+  "perfidious", "quidnunc", "soliloquy", "verisimilitude", "xenodochial",
+  "zydeco", "prestidigitation", "sesquipedalian", "uliginous", "zyzzyva"
+];
 
   let selectedLevel = "level1";
   const usedWords = { level1: [], level2: [], level3: [], level4: [], level5: [], extraWords: [] };

@@ -90,8 +90,9 @@
 </table>
 
 <script type="module">
-  import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.4.0/firebase-app.js';
-  import { getDatabase, ref, set, onValue } from 'https://www.gstatic.com/firebasejs/9.4.0/firebase-database.js';
+import { initializeApp } from "firebase/app";
+import { getDatabase, ref, set, onValue } from "firebase/database";
+
   window.generateRandomWord = generateRandomWord;
   window.resetUsedWords = resetUsedWords;
   window.updateCategory = updateCategory;
@@ -146,7 +147,8 @@ const firebaseConfig = {
 
     usedWords[selectedCategory].push(randomWord);
 
-    updateFirebaseData();
+
+    set(ref(db, `${selectedCategory}/usedWords`), usedWords[selectedCategory]);
 
     document.getElementById("randomWord").innerHTML = `<h1>${randomWord}</h1>`;
 
@@ -158,7 +160,8 @@ const firebaseConfig = {
     usedWords.primary = [];
     usedWords.intermediate = [];
 
-    updateFirebaseData();
+    set(ref(db, "primary/usedWords"), []);
+    set(ref(db, "intermediate/usedWords"), []);
 
     updateWordList();
   }
@@ -293,10 +296,6 @@ const firebaseConfig = {
     }
     updateWordList();
   });
-
-  function updateFirebaseData() {
-    update(ref(database, `${selectedCategory}/usedWords`), usedWords[selectedCategory]);
-  }
 
   // Initial update of the word list
   updateWordList();

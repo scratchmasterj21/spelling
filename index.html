@@ -399,9 +399,9 @@ function updateWordList() {
 function getWordsForLevel(levelType, level) {
     switch (levelType) {
         case "primary":
-            return primaryLevelWords[level][level];
+            return window[`${levelType}${level}Words`];
         case "intermediate":
-            return intermediateLevelWords[level][level];
+            return window[`i${levelType}${level}Words`];
         default:
             return [];
     }

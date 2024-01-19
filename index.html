@@ -155,43 +155,36 @@ const extraWords = [
   let selectedLevel = "level1";
   const usedWords = { level1: [], level2: [], level3: [], level4: [], level5: [], extraWords: [] };
 
-  function generateRandomWord() {
-    const currentLevel = selectedLevel;
-    const currentTable = document.getElementById(`${currentLevel}Table`);
-    const currentListContainer = document.getElementById(`${currentLevel}List`);
-    const currentWords = window[`${currentLevel}Words`];
+function generateRandomWord() {
+    const currentWords = getWordsForLevel(selectedLevel);
 
-    console.log(currentTable, currentListContainer, currentWords);
-
-    if (!currentWords) {
-      console.error(`Words for ${currentLevel} are not defined.`);
-      return;
+    if (usedWords[selectedLevel].length === currentWords.length) {
+        document.getElementById("randomWord").innerHTML = "<h1>All words have been used!</h1>";
+        return;
     }
 
-    if (usedWords[currentLevel].length === currentWords.length) {
-      document.getElementById("randomWord").innerHTML = "<h1>All words have been used!</h1>";
-      return;
-    }
-
-    const remainingWords = currentWords.filter(word => !usedWords[currentLevel].includes(word));
+    const remainingWords = currentWords.filter(word => !usedWords[selectedLevel].includes(word));
 
     if (remainingWords.length === 0) {
-      document.getElementById("randomWord").innerHTML = "<h1>All words have been used!</h1>";
-      return;
+        // All words have been used after filtering, update UI accordingly
+        document.getElementById("randomWord").innerHTML = "<h1>All words have been used!</h1>";
+        return;
     }
 
     const randomIndex = Math.floor(Math.random() * remainingWords.length);
     const randomWord = remainingWords[randomIndex];
 
-    usedWords[currentLevel].push(randomWord);
+    usedWords[selectedLevel].push(randomWord);
 
-    set(ref(db, `${currentLevel}/usedWords`), usedWords[currentLevel]);
+    // Simplified Firebase Realtime Database update
+    set(ref(db, `${selectedLevel}/usedWords`), usedWords[selectedLevel]);
 
     document.getElementById("randomWord").innerHTML = `<h1>${randomWord}</h1>`;
 
     document.getElementById("definition").classList.add("hidden");
     updateWordList();
-  }
+}
+
 
   function resetUsedWords() {
     for (const level in usedWords) {
@@ -203,51 +196,98 @@ const extraWords = [
   }
 
   function updateWordList() {
-    for (const level in usedWords) {
-      const currentTable = document.getElementById(`${level}Table`);
-      const currentListContainer = document.getElementById(`${level}List`);
-      const currentWords = window[`${level}Words`];
+    const currentTable = getTableForLevel(selectedLevel);
+    const currentListContainer = getListContainerForLevel(selectedLevel);
 
-      console.log(currentTable, currentListContainer, currentWords);
+    currentTable.classList.toggle("hidden", selectedLevel !== "extraWords");
+    currentListContainer.innerHTML = "";
 
-      if (!currentTable || !currentListContainer || !currentWords) {
-        console.error(`Table, list container, or words for ${level} are not defined.`);
-        continue;
-      }
+    const currentWords = getWordsForLevel(selectedLevel);
+    const words = currentWords.sort();
+    const numColumns = 5;
+    const numRows = Math.ceil(words.length / numColumns);
 
-      currentTable.classList.toggle("hidden", selectedLevel !== level);
-
-      currentListContainer.innerHTML = "";
-
-      const words = currentWords.sort();
-      const numColumns = 5;
-      const numRows = Math.ceil(words.length / numColumns);
-
-      for (let row = 0; row < numRows; row++) {
+    for (let row = 0; row < numRows; row++) {
         const tr = document.createElement("tr");
 
         for (let col = 0; col < numColumns; col++) {
-          const index = row * numColumns + col;
-          if (index < words.length) {
-            const word = words[index];
-            const td = document.createElement("td");
+            const index = row * numColumns + col;
+            if (index < words.length) {
+                const word = words[index];
+                const td = document.createElement("td");
 
-            if (usedWords[level].includes(word)) {
-              td.innerHTML = `<span class="used">${word}</span>`;
-            } else {
-              td.textContent = word;
+                if (usedWords[selectedLevel].includes(word)) {
+                    td.innerHTML = `<span class="used">${word}</span>`;
+                } else {
+                    td.textContent = word;
+                }
+
+                tr.appendChild(td);
             }
-
-            tr.appendChild(td);
-          }
         }
 
         currentListContainer.appendChild(tr);
-      }
     }
 
     updateWordCount();
-  }
+}
+
+function getWordsForLevel(level) {
+    switch (level) {
+        case "level1":
+            return level1Words;
+        case "level2":
+            return level2Words;
+        case "level3":
+            return level3Words;
+        case "level4":
+            return level4Words;
+        case "level5":
+            return level5Words;
+        case "extraWords":
+            return extraWords;
+        default:
+            return [];
+    }
+}
+
+function getTableForLevel(level) {
+    switch (level) {
+        case "level1":
+            return document.getElementById("level1Table");
+        case "level2":
+            return document.getElementById("level2Table");
+        case "level3":
+            return document.getElementById("level3Table");
+        case "level4":
+            return document.getElementById("level4Table");
+        case "level5":
+            return document.getElementById("level5Table");
+        case "extraWords":
+            return document.getElementById("extraWordsTable");
+        default:
+            return null;
+    }
+}
+
+function getListContainerForLevel(level) {
+    switch (level) {
+        case "level1":
+            return document.getElementById("level1List");
+        case "level2":
+            return document.getElementById("level2List");
+        case "level3":
+            return document.getElementById("level3List");
+        case "level4":
+            return document.getElementById("level4List");
+        case "level5":
+            return document.getElementById("level5List");
+        case "extraWords":
+            return document.getElementById("extraWordsList");
+        default:
+            return null;
+    }
+}
 
   function updateWordCount() {
     const numWordsLeft = usedWords[selectedLevel].length === 0 ? 0 : window[selectedLevel + 'Words'].length - usedWords[selectedLevel].length;

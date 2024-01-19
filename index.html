@@ -92,7 +92,10 @@
 <script type="module">
   import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.4.0/firebase-app.js';
   import { getDatabase, ref, set, onValue } from 'https://www.gstatic.com/firebasejs/9.4.0/firebase-database.js';
-
+  window.generateRandomWord = generateRandomWord;
+  window.resetUsedWords = resetUsedWords;
+  window.updateCategory = updateCategory;
+  window.showDefinition = showDefinition;
 
 const firebaseConfig = {
   apiKey: "AIzaSyAjBQR3CIyFe2B3X764vUAlgZBBv6MXWxU",

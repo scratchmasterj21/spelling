@@ -163,15 +163,20 @@ const firebaseConfig = {
     updateWordList();
   }
 
-  function resetUsedWords() {
+function resetUsedWords() {
     usedWords.primary = [];
     usedWords.intermediate = [];
 
-    set(ref(db, "primary/usedWords"), []);
-    set(ref(db, "intermediate/usedWords"), []);
+    set(ref(db, "primary/usedWords"), []).then(() => {
+        // Trigger update after the database is updated
+        updateWordList();
+    });
 
-    updateWordList();
-  }
+    set(ref(db, "intermediate/usedWords"), []).then(() => {
+        // Trigger update after the database is updated
+        updateWordList();
+    });
+}
 
   function updateWordList() {
     const primaryTable = document.getElementById("primaryTable");

@@ -497,6 +497,11 @@ function updateWordCount() {
     updateWordList();
   }
 
+  function updateLevelType() {
+    selectedLevelType = document.querySelector('input[name="levelType"]:checked').value;
+    updateWordList();
+}
+
   function showDefinition() {
     const randomWord = document.getElementById("randomWord").textContent;
 

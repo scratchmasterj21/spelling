@@ -91,7 +91,7 @@
 
 <script type="module">
   import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.4.0/firebase-app.js';
-  import { getDatabase, ref, set, child, on } from 'https://www.gstatic.com/firebasejs/9.4.0/firebase-database.js';
+  import { getDatabase, ref, set, onValue } from 'https://www.gstatic.com/firebasejs/9.4.0/firebase-database.js';
 
 
 const firebaseConfig = {
@@ -145,7 +145,7 @@ const firebaseConfig = {
     usedWords[selectedCategory].push(randomWord);
 
 
-    set(child(db, `${selectedCategory}/usedWords`), usedWords[selectedCategory]);
+    set(ref(db, `${selectedCategory}/usedWords`), usedWords[selectedCategory]);
 
 
 
@@ -159,9 +159,9 @@ const firebaseConfig = {
     usedWords.primary = [];
     usedWords.intermediate = [];
 
-    set(child(db, "primary/usedWords"), []);
-    set(child(db, "intermediate/usedWords"), []);
-    
+    set(ref(db, "primary/usedWords"), []);
+    set(ref(db, "intermediate/usedWords"), []);
+
     updateWordList();
   }
 
@@ -280,7 +280,7 @@ const firebaseConfig = {
   }
 
   // Subscribe to changes in the Firebase database on page load
-  on(child(db, "primary/usedWords"), 'value', snapshot => {
+  onValue(ref(db, "primary/usedWords"), snapshot => {
     const usedWordsFromFirebase = snapshot.val();
     if (usedWordsFromFirebase) {
       usedWords.primary = usedWordsFromFirebase;
@@ -288,7 +288,7 @@ const firebaseConfig = {
     updateWordList();
   });
 
-  on(child(db, "intermediate/usedWords"), 'value', snapshot => {
+  onValue(ref(db, "intermediate/usedWords"), snapshot => {
     const usedWordsFromFirebase = snapshot.val();
     if (usedWordsFromFirebase) {
       usedWords.intermediate = usedWordsFromFirebase;

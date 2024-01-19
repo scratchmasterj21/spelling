@@ -534,19 +534,22 @@ function updateWordCount() {
   }
 
   // Subscribe to changes in the Firebase database on page load
+// Subscribe to changes in the Firebase database on page load
 for (const levelType in usedWords) {
     for (const level in usedWords[levelType]) {
-        onValue(ref(db, `${levelType}/${level}/usedWords`), snapshot => {
-            const usedWordsFromFirebase = snapshot.val();
-            if (usedWordsFromFirebase) {
-                usedWords[levelType][level] = usedWordsFromFirebase;
-                if (usedWords[levelType][level].length > 0) {
-                    const latestWord = usedWords[levelType][level][usedWords[levelType][level].length - 1];
-                    document.getElementById("randomWord").innerHTML = `<h1>${latestWord}</h1>`;
+        (function (currentLevelType, currentLevel) {
+            onValue(ref(db, `${currentLevelType}/${currentLevel}/usedWords`), snapshot => {
+                const usedWordsFromFirebase = snapshot.val();
+                if (usedWordsFromFirebase) {
+                    usedWords[currentLevelType][currentLevel] = usedWordsFromFirebase;
+                    if (usedWords[currentLevelType][currentLevel].length > 0) {
+                        const latestWord = usedWords[currentLevelType][currentLevel][usedWords[currentLevelType][currentLevel].length - 1];
+                        document.getElementById("randomWord").innerHTML = `<h1>${latestWord}</h1>`;
+                    }
                 }
-            }
-            updateWordList();
-        });
+                updateWordList();
+            });
+        })(levelType, level);
     }
 }
 

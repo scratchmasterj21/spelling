@@ -421,7 +421,7 @@ function updateWordCount() {
     .then(data => {
       if (data && data.results && data.results.length > 0) {
         const definitions = data.results.map(result => result.definition).filter(Boolean);
-        const examples = data.results.map(result => result.examples).flat().filter(Boolean);
+        const examples = data.results.map(result => result.example).flat().filter(Boolean);
 
         showDefinitionAndExamples(definitions, examples);
       } else {

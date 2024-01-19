@@ -3,7 +3,6 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
   <title>Random Word Generator</title>
   <style>
     body {
@@ -109,7 +108,6 @@ const firebaseConfig = {
   measurementId: "G-82924CD1JX"
 };
 
-
   // Initialize Firebase
   const firebaseApp = initializeApp(firebaseConfig);
   const db = getDatabase(firebaseApp);
@@ -143,12 +141,19 @@ const firebaseConfig = {
     }
 
     const remainingWords = currentCategory.filter(word => !usedWords[selectedCategory].includes(word));
+
+    if (remainingWords.length === 0) {
+      // All words have been used after filtering, update UI accordingly
+      document.getElementById("randomWord").innerHTML = "<h1>All words have been used!</h1>";
+      return;
+    }
+
     const randomIndex = Math.floor(Math.random() * remainingWords.length);
     const randomWord = remainingWords[randomIndex];
 
     usedWords[selectedCategory].push(randomWord);
 
-
+    // Simplified Firebase Realtime Database update
     set(ref(db, `${selectedCategory}/usedWords`), usedWords[selectedCategory]);
 
     document.getElementById("randomWord").innerHTML = `<h1>${randomWord}</h1>`;

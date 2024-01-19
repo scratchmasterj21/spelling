@@ -266,20 +266,24 @@ const iextraWords = [
   "zydeco", "prestidigitation", "sesquipedalian", "uliginous", "zyzzyva"
 ];
 
-  window.level1Words = level1Words;
-window.level2Words = level2Words;
-window.level3Words = level3Words;
-window.level4Words = level4Words;
-window.level5Words = level5Words;
-window.extraWords = extraWords;
+window.primaryLevelWords = {
+  level1: level1Words,
+  level2: level2Words,
+  level3: level3Words,
+  level4: level4Words,
+  level5: level5Words,
+  extraWords: extraWords
+};
 
+window.intermediateLevelWords = {
+  level1: ilevel1Words,
+  level2: ilevel2Words,
+  level3: ilevel3Words,
+  level4: ilevel4Words,
+  level5: ilevel5Words,
+  extraWords: iextraWords
+};
 
-  window.ilevel1Words = ilevel1Words;
-window.ilevel2Words = ilevel2Words;
-window.ilevel3Words = ilevel3Words;
-window.ilevel4Words = ilevel4Words;
-window.ilevel5Words = ilevel5Words;
-window.iextraWords = iextraWords;
 
  let selectedLevelType = "primary";
   let selectedLevel = "level1";
@@ -395,47 +399,9 @@ function updateWordList() {
 function getWordsForLevel(levelType, level) {
     switch (levelType) {
         case "primary":
-            return getPrimaryWordsForLevel(level);
+            return primaryLevelWords[level][level];
         case "intermediate":
-            return getIntermediateWordsForLevel(level);
-        default:
-            return [];
-    }
-}
-
-function getPrimaryWordsForLevel(level) {
-    switch (level) {
-        case "level1":
-            return level1Words;
-        case "level2":
-            return level2Words;
-        case "level3":
-            return level3Words;
-        case "level4":
-            return level4Words;
-        case "level5":
-            return level5Words;
-        case "extraWords":
-            return extraWords;
-        default:
-            return [];
-    }
-}
-
-function getIntermediateWordsForLevel(level) {
-    switch (level) {
-        case "level1":
-            return ilevel1Words;
-        case "level2":
-            return ilevel2Words;
-        case "level3":
-            return ilevel3Words;
-        case "level4":
-            return ilevel4Words;
-        case "level5":
-            return ilevel5Words;
-        case "extraWords":
-            return iextraWords;
+            return intermediateLevelWords[level][level];
         default:
             return [];
     }
@@ -486,13 +452,14 @@ function updateWordCount() {
         numWordsLeft = window[selectedLevelType][selectedLevel].length - usedWords[selectedLevelType][selectedLevel].length;
         totalNumWords = window[selectedLevelType][selectedLevel].length;
     } else {
-        numWordsLeft = window[selectedLevelType][selectedLevel + 'Words'].length - usedWords[selectedLevelType][selectedLevel].length;
-        totalNumWords = window[selectedLevelType][selectedLevel + 'Words'].length;
+        numWordsLeft = window[selectedLevelType][selectedLevel][selectedLevel + 'Words'].length - usedWords[selectedLevelType][selectedLevel].length;
+        totalNumWords = window[selectedLevelType][selectedLevel][selectedLevel + 'Words'].length;
     }
 
     document.getElementById("numWordsLeft").textContent = `Words Left: ${numWordsLeft}`;
     document.getElementById("totalNumWords").textContent = `Total Words: ${totalNumWords}`;
 }
+
   function updateLevel() {
     selectedLevel = document.querySelector('input[name="level"]:checked').value;
     updateWordList();

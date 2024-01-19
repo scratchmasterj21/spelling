@@ -285,6 +285,8 @@ window.intermediateLevelWords = {
 };
 
 
+
+
  let selectedLevelType = "primary";
   let selectedLevel = "level1";
 const usedWords = { 
@@ -452,13 +454,20 @@ function updateWordCount() {
         numWordsLeft = window[selectedLevelType][selectedLevel].length - usedWords[selectedLevelType][selectedLevel].length;
         totalNumWords = window[selectedLevelType][selectedLevel].length;
     } else {
-        numWordsLeft = window[selectedLevelType][selectedLevel][selectedLevel + 'Words'].length - usedWords[selectedLevelType][selectedLevel].length;
-        totalNumWords = window[selectedLevelType][selectedLevel][selectedLevel + 'Words'].length;
+        const currentWords = getWordsForLevel(selectedLevelType, selectedLevel);
+        if (!currentWords) {
+            console.error("Words for the selected level are not defined.");
+            return;
+        }
+
+        numWordsLeft = currentWords.length - usedWords[selectedLevelType][selectedLevel].length;
+        totalNumWords = currentWords.length;
     }
 
     document.getElementById("numWordsLeft").textContent = `Words Left: ${numWordsLeft}`;
     document.getElementById("totalNumWords").textContent = `Total Words: ${totalNumWords}`;
 }
+
 
   function updateLevel() {
     selectedLevel = document.querySelector('input[name="level"]:checked').value;

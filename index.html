@@ -371,7 +371,7 @@ function updateWordList() {
                 const word = words[index];
                 const td = document.createElement("td");
 
-                if (usedWords[selectedLevel].includes(word)) {
+                if (usedWords[selectedLevelType][selectedLevel].includes(word)) {
                     td.innerHTML = `<span class="used">${word}</span>`;
                 } else {
                     td.textContent = word;

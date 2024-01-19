@@ -147,7 +147,8 @@ const firebaseConfig = {
     usedWords[selectedCategory].push(randomWord);
 
 
-    push(ref(db, `${selectedCategory}/usedWords`), usedWords[selectedCategory]);
+    const newEntryRef = push(ref(database, `${selectedCategory}/usedWords`));
+    set(newEntryRef, usedWords[selectedCategory]);
 
     document.getElementById("randomWord").innerHTML = `<h1>${randomWord}</h1>`;
 
@@ -159,8 +160,11 @@ const firebaseConfig = {
     usedWords.primary = [];
     usedWords.intermediate = [];
 
-    push(ref(db, "primary/usedWords"), []);
-    push(ref(db, "intermediate/usedWords"), []);
+   const primaryEntryRef = push(ref(database, "primary/usedWords"));
+    set(primaryEntryRef, usedWords.primary);
+
+    const intermediateEntryRef = push(ref(database, "intermediate/usedWords"));
+    set(intermediateEntryRef, usedWords.intermediate);
 
     updateWordList();
   }

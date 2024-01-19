@@ -275,6 +275,8 @@ function updateWordList() {
         return;
     }
 
+    console.log("Selected Level:", selectedLevel);
+
     // Clear the table content
     currentListContainer.innerHTML = "";
 
@@ -284,6 +286,8 @@ function updateWordList() {
         console.error("Words for the selected level are not defined.");
         return;
     }
+
+    console.log("Current Words:", currentWords);
 
     const words = currentWords.sort();
     const numColumns = 5;
@@ -313,6 +317,7 @@ function updateWordList() {
 
     updateWordCount();
 }
+
 
 
 

@@ -270,7 +270,7 @@ function updateWordList() {
     // Hide all word list containers
     const allListContainers = document.querySelectorAll(".word-list-container");
     allListContainers.forEach(container => {
-        container.classList.add("hidden");
+        container.style.display = "none";
     });
 
     const currentTable = getTableForLevel(selectedLevel);
@@ -323,9 +323,10 @@ function updateWordList() {
 
     updateWordCount();
 
-    // Remove the 'hidden' class for the currentListContainer
-    currentListContainer.classList.remove("hidden");
+    // Set the display property to "table" for the currentListContainer
+    currentListContainer.style.display = "table";
 }
+
 
 
 

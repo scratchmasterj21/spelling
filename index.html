@@ -91,7 +91,7 @@
 
 <script type="module">
   import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.4.0/firebase-app.js';
-  import { getDatabase } from 'https://www.gstatic.com/firebasejs/9.4.0/firebase-database.js';
+  import { getDatabase, ref, set } from 'https://www.gstatic.com/firebasejs/9.4.0/firebase-database.js';
 
 
 const firebaseConfig = {
@@ -159,7 +159,7 @@ const firebaseConfig = {
 
     const database = getDatabase(firebaseApp);
     const db = ref(database);
-    
+
     db.ref("primary/usedWords").set([]);
     db.ref("intermediate/usedWords").set([]);
 

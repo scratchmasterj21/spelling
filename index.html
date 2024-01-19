@@ -71,7 +71,7 @@
 <p id="numWordsLeft">Words Left: 0</p>
 <p id="totalNumWords">Total Words: 0</p>
 
-<table id="level1Table" class="hidden">
+<table id="level1Table" class="word-list-container">
   <thead>
     <tr>
       <th>Column 1</th>
@@ -85,7 +85,7 @@
 </table>
 
 <!-- Add similar tables for other levels (level2Table, level3Table, etc.) -->
-<table id="level2Table" class="hidden">
+<table id="level2Table" class="word-list-container">
   <thead>
     <tr>
       <th>Column 1</th>
@@ -98,7 +98,7 @@
   <tbody id="level2List"></tbody>
 </table>
 
-<table id="level3Table" class="hidden">
+<table id="level3Table" class="word-list-container">
   <thead>
     <tr>
       <th>Column 1</th>
@@ -111,7 +111,7 @@
   <tbody id="level3List"></tbody>
 </table>
 
-<table id="level4Table" class="hidden">
+<table id="level4Table" class="word-list-container">
   <thead>
     <tr>
       <th>Column 1</th>
@@ -124,7 +124,7 @@
   <tbody id="level4List"></tbody>
 </table>
 
-<table id="level5Table" class="hidden">
+<table id="level5Table" class="word-list-container">
   <thead>
     <tr>
       <th>Column 1</th>
@@ -137,7 +137,7 @@
   <tbody id="level5List"></tbody>
 </table>
 
-<table id="extraWordsTable" class="hidden">
+<table id="extraWordsTable" class="word-list-container">
   <thead>
     <tr>
       <th>Column 1</th>
@@ -267,11 +267,17 @@ function generateRandomWord() {
   }
 
 function updateWordList() {
+    // Hide all word list containers
+    const allListContainers = document.querySelectorAll(".word-list-container");
+    allListContainers.forEach(container => {
+        container.classList.add("hidden");
+    });
+
     const currentTable = getTableForLevel(selectedLevel);
     const currentListContainer = getListContainerForLevel(selectedLevel);
 
     if (!currentTable || !currentListContainer) {
-        console.error("Table, list container, or words for the selected level are not defined.");
+        console.error("Table or list container for the selected level is not defined.");
         return;
     }
 
@@ -317,6 +323,7 @@ function updateWordList() {
 
     updateWordCount();
 
+    // Remove the 'hidden' class for the currentListContainer
     currentListContainer.classList.remove("hidden");
 }
 

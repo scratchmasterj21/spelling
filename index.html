@@ -132,14 +132,17 @@ const firebaseConfig = {
   let selectedCategory = "primary";
   const usedWords = { primary: [], intermediate: [] };
 
-  function getCurrentWord() {
+function getCurrentWord() {
   const currentWordRef = ref(db, `${selectedCategory}/currentWord`);
+
+  // Set an initial value for currentWord if it doesn't exist
+  set(currentWordRef, null);
 
   onValue(currentWordRef, snapshot => {
     const currentWord = snapshot.val();
-    document.getElementById("randomWord").innerHTML = `<h1>${currentWord}</h1>`;
+    document.getElementById("randomWord").innerHTML = `<h1>${currentWord || 'Click to generate a word'}</h1>`;
   });
-  }
+}
 
   function generateRandomWord() {
     const currentCategory = selectedCategory === "primary" ? primaryWords : intermediateWords;
@@ -163,7 +166,7 @@ const firebaseConfig = {
     usedWords[selectedCategory].push(randomWord);
 
 
-  set(ref(db, `${selectedCategory}/currentWord`), randomWord);
+    set(ref(db, `${selectedCategory}/currentWord`), randomWord);
 
     // Simplified Firebase Realtime Database update
     set(ref(db, `${selectedCategory}/usedWords`), usedWords[selectedCategory]);

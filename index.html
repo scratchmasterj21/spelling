@@ -406,13 +406,18 @@ function updateWordCount() {
   function showDefinition() {
     const randomWord = document.getElementById("randomWord").textContent;
 
-    fetch(`https://wordsapiv1.p.rapidapi.com/words/${randomWord}`, {
-      method: "GET",
-      headers: {
-        "X-RapidAPI-Host": "wordsapiv1.p.rapidapi.com",
-        "X-RapidAPI-Key": "06f20456cfmsh1b8e00ea9fb360dp1243b0jsn77475ae1802e"
+    fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${randomWord}`, {
+      method: "GET"
       }
     })
+
+    //fetch(`https://wordsapiv1.p.rapidapi.com/words/${randomWord}`, {
+    //  method: "GET",
+     // headers: {
+    //    "X-RapidAPI-Host": "wordsapiv1.p.rapidapi.com",
+     //   "X-RapidAPI-Key": "06f20456cfmsh1b8e00ea9fb360dp1243b0jsn77475ae1802e"
+    //  }
+   // })
     .then(response => response.json())
     .then(data => {
       if (data && data.results && data.results.length > 0) {

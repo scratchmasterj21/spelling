@@ -267,23 +267,20 @@ function generateRandomWord() {
   }
 
 function updateWordList() {
-    // Hide all word list containers
-    const allListContainers = document.querySelectorAll(".word-list-container");
-    allListContainers.forEach(container => {
-        container.style.display = "none";
-    });
-
     const currentTable = getTableForLevel(selectedLevel);
     const currentListContainer = getListContainerForLevel(selectedLevel);
 
     if (!currentTable || !currentListContainer) {
-        console.error("Table or list container for the selected level is not defined.");
+        console.error("Table, list container, or words for the selected level are not defined.");
         return;
     }
 
-    console.log("Selected Level:", selectedLevel);
+    // Hide all tables and show the selected one
+    document.querySelectorAll('table[id^="level"]').forEach(table => {
+        table.classList.add("hidden");
+    });
+    currentTable.classList.remove("hidden");
 
-    // Clear the table content
     currentListContainer.innerHTML = "";
 
     const currentWords = getWordsForLevel(selectedLevel);
@@ -292,8 +289,6 @@ function updateWordList() {
         console.error("Words for the selected level are not defined.");
         return;
     }
-
-    console.log("Current Words:", currentWords);
 
     const words = currentWords.sort();
     const numColumns = 5;
@@ -322,10 +317,8 @@ function updateWordList() {
     }
 
     updateWordCount();
-
-    // Set the display property to "block" for the currentListContainer
-    currentListContainer.style.display = "block";
 }
+
 
 
 function getWordsForLevel(level) {

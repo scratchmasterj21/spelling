@@ -279,7 +279,10 @@ function updateWordList() {
     document.querySelectorAll('table[id^="level"]').forEach(table => {
         table.classList.add("hidden");
     });
-    currentTable.classList.remove("hidden");
+    
+    if (selectedLevel !== "extraWords") {
+        currentTable.classList.remove("hidden");
+    }
 
     currentListContainer.innerHTML = "";
 
@@ -318,6 +321,7 @@ function updateWordList() {
 
     updateWordCount();
 }
+
 
 
 

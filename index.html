@@ -153,6 +153,9 @@ const firebaseConfig = {
 
     usedWords[selectedCategory].push(randomWord);
 
+
+  set(ref(db, `${selectedCategory}/currentWord`), randomWord);
+
     // Simplified Firebase Realtime Database update
     set(ref(db, `${selectedCategory}/usedWords`), usedWords[selectedCategory]);
 
@@ -308,6 +311,18 @@ function updateWordCount() {
     }
     updateWordList();
   });
+
+  function getCurrentWord() {
+  const currentWordRef = ref(db, `${selectedCategory}/currentWord`);
+
+  onValue(currentWordRef, snapshot => {
+    const currentWord = snapshot.val();
+    document.getElementById("randomWord").innerHTML = `<h1>${currentWord || 'Click to generate a word'}</h1>`;
+  });
+}
+
+// Call this function to get the current word from Firebase on page load
+getCurrentWord();
 
   // Initial update of the word list
   updateWordList();

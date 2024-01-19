@@ -300,14 +300,20 @@ function getListContainerForLevel(level) {
     }
 }
 
-  function updateWordCount() {
-    const numWordsLeft = usedWords[selectedLevel].length === 0 ? 0 : window[selectedLevel + 'Words'].length - usedWords[selectedLevel].length;
-    const totalNumWords = window[selectedLevel + 'Words'].length;
+function updateWordCount() {
+    let numWordsLeft, totalNumWords;
+
+    if (selectedLevel === "extraWords") {
+        numWordsLeft = window[selectedLevel].length - usedWords[selectedLevel].length;
+        totalNumWords = window[selectedLevel].length;
+    } else {
+        numWordsLeft = window[selectedLevel + 'Words'].length - usedWords[selectedLevel].length;
+        totalNumWords = window[selectedLevel + 'Words'].length;
+    }
 
     document.getElementById("numWordsLeft").textContent = `Words Left: ${numWordsLeft}`;
     document.getElementById("totalNumWords").textContent = `Total Words: ${totalNumWords}`;
-  }
-
+}
   function updateLevel() {
     selectedLevel = document.querySelector('input[name="level"]:checked').value;
     updateWordList();

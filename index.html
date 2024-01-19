@@ -32,9 +32,9 @@
       color: #999;
     }
 
-.hidden {
-    display: table !important;
-}
+    .hidden {
+      display: none;
+    }
 
     #definition {
       margin-top: 20px;
@@ -316,6 +316,8 @@ function updateWordList() {
     }
 
     updateWordCount();
+
+    currentListContainer.classList.remove("hidden");
 }
 
 

@@ -482,11 +482,11 @@ function updateWordCount() {
     let numWordsLeft, totalNumWords;
 
     if (selectedLevel === "extraWords") {
-        numWordsLeft = window[selectedLevel].length - usedWords[selectedLevel].length;
-        totalNumWords = window[selectedLevel].length;
+        numWordsLeft = window[selectedLevelType][selectedLevel].length - usedWords[selectedLevelType][selectedLevel].length;
+        totalNumWords = window[selectedLevelType][selectedLevel].length;
     } else {
-        numWordsLeft = window[selectedLevel + 'Words'].length - usedWords[selectedLevel].length;
-        totalNumWords = window[selectedLevel + 'Words'].length;
+        numWordsLeft = window[selectedLevelType][selectedLevel + 'Words'].length - usedWords[selectedLevelType][selectedLevel].length;
+        totalNumWords = window[selectedLevelType][selectedLevel + 'Words'].length;
     }
 
     document.getElementById("numWordsLeft").textContent = `Words Left: ${numWordsLeft}`;

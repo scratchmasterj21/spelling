@@ -122,6 +122,13 @@ const firebaseConfig = {
     const currentListContainer = document.getElementById(`${currentLevel}List`);
     const currentWords = window[`${currentLevel}Words`];
 
+    console.log(currentTable, currentListContainer, currentWords);
+
+    if (!currentWords) {
+      console.error(`Words for ${currentLevel} are not defined.`);
+      return;
+    }
+
     if (usedWords[currentLevel].length === currentWords.length) {
       document.getElementById("randomWord").innerHTML = "<h1>All words have been used!</h1>";
       return;
@@ -162,6 +169,13 @@ const firebaseConfig = {
       const currentListContainer = document.getElementById(`${level}List`);
       const currentWords = window[`${level}Words`];
 
+      console.log(currentTable, currentListContainer, currentWords);
+
+      if (!currentTable || !currentListContainer || !currentWords) {
+        console.error(`Table, list container, or words for ${level} are not defined.`);
+        continue;
+      }
+
       currentTable.classList.toggle("hidden", selectedLevel !== level);
 
       currentListContainer.innerHTML = "";
@@ -198,7 +212,6 @@ const firebaseConfig = {
 
   function updateWordCount() {
     const numWordsLeft = usedWords[selectedLevel].length === 0 ? 0 : window[selectedLevel + 'Words'].length - usedWords[selectedLevel].length;
-
     const totalNumWords = window[selectedLevel + 'Words'].length;
 
     document.getElementById("numWordsLeft").textContent = `Words Left: ${numWordsLeft}`;

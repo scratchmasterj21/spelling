@@ -219,13 +219,19 @@ const firebaseConfig = {
     updateWordCount();
   }
 
-  function updateWordCount() {
-    const numWordsLeft = primaryWords.length - usedWords.primary.length;
-    const totalNumWords = primaryWords.length;
+function updateWordCount() {
+  const numWordsLeft = selectedCategory === "primary" ?
+    primaryWords.length - usedWords.primary.length :
+    intermediateWords.length - usedWords.intermediate.length;
 
-    document.getElementById("numWordsLeft").textContent = `Words Left: ${numWordsLeft}`;
-    document.getElementById("totalNumWords").textContent = `Total Words: ${totalNumWords}`;
-  }
+  const totalNumWords = selectedCategory === "primary" ?
+    primaryWords.length :
+    intermediateWords.length;
+
+  document.getElementById("numWordsLeft").textContent = `Words Left: ${numWordsLeft}`;
+  document.getElementById("totalNumWords").textContent = `Total Words: ${totalNumWords}`;
+}
+
 
   function updateCategory() {
     selectedCategory = document.querySelector('input[name="category"]:checked').value;

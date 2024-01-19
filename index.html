@@ -132,6 +132,15 @@ const firebaseConfig = {
   let selectedCategory = "primary";
   const usedWords = { primary: [], intermediate: [] };
 
+  function getCurrentWord() {
+  const currentWordRef = ref(db, `${selectedCategory}/currentWord`);
+
+  onValue(currentWordRef, snapshot => {
+    const currentWord = snapshot.val();
+    document.getElementById("randomWord").innerHTML = `<h1>${currentWord}</h1>`;
+  });
+  }
+
   function generateRandomWord() {
     const currentCategory = selectedCategory === "primary" ? primaryWords : intermediateWords;
 

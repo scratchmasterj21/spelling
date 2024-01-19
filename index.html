@@ -338,12 +338,7 @@ function resetUsedWords() {
 }
 
 function updateWordList() {
-   const currentWords = getWordsForLevel(selectedLevelType, selectedLevel);
 
-    if (!currentWords) {
-        console.error("Words for the selected level are not defined.");
-        return;
-    }
     const currentTable = getTableForLevel(selectedLevel);
     const currentListContainer = getListContainerForLevel(selectedLevel);
 
@@ -364,7 +359,12 @@ function updateWordList() {
     currentTable.classList.remove("hidden");
     currentListContainer.innerHTML = "";
 
- 
+    const currentWords = getWordsForLevel(selectedLevelType, selectedLevel);
+
+    if (!currentWords) {
+        console.error("Words for the selected level are not defined.");
+        return;
+    }
 
     const words = currentWords.sort();
     const numColumns = 5;

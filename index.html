@@ -280,6 +280,10 @@ function updateWordList() {
         table.classList.add("hidden");
     });
 
+       document.querySelectorAll('table[id^="extraWords"]').forEach(table => {
+        table.classList.add("hidden");
+    });
+
     currentTable.classList.remove("hidden");
     currentListContainer.innerHTML = "";
 

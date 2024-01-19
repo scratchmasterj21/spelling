@@ -401,11 +401,11 @@ function updateWordList() {
 function getWordsForLevel(levelType, level) {
     switch (levelType) {
         case "primary":
-            return window[`${levelType}${level}Words`];
+            return window[`${levelType}LevelWords`][level];
         case "intermediate":
-            return window[`i${levelType}${level}Words`];
+            return window[`i${levelType}LevelWords`][level];
         default:
-            return [];
+            return window[levelType + "Words"];
     }
 }
 

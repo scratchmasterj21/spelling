@@ -158,7 +158,7 @@ const extraWords = [
 function generateRandomWord() {
     const currentWords = getWordsForLevel(selectedLevel);
 
-    if (usedWords[selectedLevel].length === currentWords.length) {
+    if (!currentWords || usedWords[selectedLevel].length === currentWords.length) {
         document.getElementById("randomWord").innerHTML = "<h1>All words have been used!</h1>";
         return;
     }
@@ -199,10 +199,21 @@ function generateRandomWord() {
     const currentTable = getTableForLevel(selectedLevel);
     const currentListContainer = getListContainerForLevel(selectedLevel);
 
+    if (!currentTable || !currentListContainer) {
+        console.error("Table, list container, or words for the selected level are not defined.");
+        return;
+    }
+
     currentTable.classList.toggle("hidden", selectedLevel !== "extraWords");
     currentListContainer.innerHTML = "";
 
     const currentWords = getWordsForLevel(selectedLevel);
+
+    if (!currentWords) {
+        console.error("Words for the selected level are not defined.");
+        return;
+    }
+
     const words = currentWords.sort();
     const numColumns = 5;
     const numRows = Math.ceil(words.length / numColumns);

@@ -109,6 +109,7 @@ const firebaseConfig = {
   const firebaseApp = initializeApp(firebaseConfig);
   const database = getDatabase(firebaseApp);
   const db = ref(database);
+
   const primaryWords = ["again", "although", "answer", "any", "are", "become", "been", "both", "bought", "catch",
                         "climbed", "color", "come", "could", "country", "do", "does", "door", "earth", "edge",
                         "eight", "enough", "example", "eyes", "father", "few", "find", "four", "friend", "from",
@@ -143,7 +144,9 @@ const firebaseConfig = {
 
     usedWords[selectedCategory].push(randomWord);
 
-    db.ref(`${selectedCategory}/usedWords`).set(usedWords[selectedCategory]);
+
+    set(ref(database, `${selectedCategory}/usedWords`), usedWords[selectedCategory]);
+
 
     document.getElementById("randomWord").innerHTML = `<h1>${randomWord}</h1>`;
 
@@ -155,8 +158,8 @@ const firebaseConfig = {
     usedWords.primary = [];
     usedWords.intermediate = [];
 
-    db.ref("primary/usedWords").set([]);
-    db.ref("intermediate/usedWords").set([]);
+    set(ref(database, "primary/usedWords"), []);
+    set(ref(database, "intermediate/usedWords"), []);
 
     updateWordList();
   }

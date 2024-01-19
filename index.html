@@ -44,6 +44,12 @@
 <body>
 
 <h1>Random Word Selector</h1>
+
+<input type="radio" name="levelType" value="primary" id="primaryRadio" checked onclick="updateLevelType()">
+  <label for="primaryRadio">Primary</label>
+<input type="radio" name="levelType" value="intermediate" id="intermediateRadio" onclick="updateLevelType()">
+  <label for="intermediateRadio">Intermediate</label>
+
 <input type="radio" name="level" value="level1" id="level1Radio" checked onclick="updateLevel()"> 
   <label for="level1Radio">Level 1</label>
 <input type="radio" name="level" value="level2" id="level2Radio" onclick="updateLevel()"> 
@@ -216,6 +222,49 @@ const extraWords = [
   "zydeco", "prestidigitation", "sesquipedalian", "uliginous", "zyzzyva"
 ];
 
+
+const ilevel1Words = [
+  "apple", "banana", "cherry", "dog", "elephant",
+  "flower", "guitar", "happy", "igloo", "jazz",
+  "kite", "lemon", "mountain", "notebook", "orange",
+  "puzzle", "rainbow", "sun", "tiger", "umbrella"
+];
+
+const ilevel2Words = [
+  "bicycle", "cactus", "diamond", "eagle", "fountain",
+  "giraffe", "happiness", "ice cream", "jungle", "kiwi",
+  "lighthouse", "magnificent", "ocean", "parrot", "quilt",
+  "rocket", "sunset", "treasure", "volcano", "waterfall"
+];
+
+const ilevel3Words = [
+  "astronomy", "breathtaking", "caterpillar", "dolphin", "elegant",
+  "fantastic", "gargantuan", "harmony", "illuminate", "jubilant",
+  "kaleidoscope", "luminous", "mysterious", "nostalgia", "orchestra",
+  "phenomenal", "quintessential", "serendipity", "tranquil", "universal"
+];
+
+const ilevel4Words = [
+  "ambassador", "benevolent", "cynosure", "effervescent", "fortuitous",
+  "gallant", "hierarchical", "indomitable", "juxtapose", "kaleidoscopic",
+  "labyrinthine", "mellifluous", "nepotism", "obfuscate", "philanthropy",
+  "quizzical", "resplendent", "superfluous", "ubiquitous", "verisimilitude"
+];
+
+const ilevel5Words = [
+  "acquiesce", "belligerent", "cacophony", "deleterious", "ephemeral",
+  "facetious", "gregarious", "hirsute", "iconoclast", "juxtaposition",
+  "kowtow", "lugubrious", "mellifluous", "nonchalant", "obfuscate",
+  "paradigm", "quixotic", "recalcitrant", "sycophant", "ubiquitous"
+];
+
+const iextraWords = [
+  "effulgent", "bibliopole", "susurrus", "gallimaufry", "discombobulate",
+  "limerence", "recumbentibus", "sesquipedalian", "vicissitude", "mellisonant",
+  "perfidious", "quidnunc", "soliloquy", "verisimilitude", "xenodochial",
+  "zydeco", "prestidigitation", "sesquipedalian", "uliginous", "zyzzyva"
+];
+
   window.level1Words = level1Words;
 window.level2Words = level2Words;
 window.level3Words = level3Words;
@@ -223,18 +272,32 @@ window.level4Words = level4Words;
 window.level5Words = level5Words;
 window.extraWords = extraWords;
 
+
+  window.ilevel1Words = ilevel1Words;
+window.ilevel2Words = ilevel2Words;
+window.ilevel3Words = ilevel3Words;
+window.ilevel4Words = ilevel4Words;
+window.ilevel5Words = ilevel5Words;
+window.iextraWords = iextraWords;
+
+ let selectedLevelType = "primary";
   let selectedLevel = "level1";
-  const usedWords = { level1: [], level2: [], level3: [], level4: [], level5: [], extraWords: [] };
+const usedWords = { 
+    primary: { level1: [], level2: [], level3: [], level4: [], level5: [], extraWords: [] }, 
+    intermediate: { level1: [], level2: [], level3: [], level4: [], level5: [], extraWords: [] } 
+  };
+
 
 function generateRandomWord() {
-    const currentWords = getWordsForLevel(selectedLevel);
+    const currentWords = getWordsForLevel(selectedLevelType, selectedLevel);
 
-    if (!currentWords || usedWords[selectedLevel].length === currentWords.length) {
+
+    if (!currentWords || usedWords[selectedLevelType][selectedLevel].length === currentWords.length) {
         document.getElementById("randomWord").innerHTML = "<h1>All words have been used!</h1>";
         return;
     }
 
-    const remainingWords = currentWords.filter(word => !usedWords[selectedLevel].includes(word));
+    const remainingWords = currentWords.filter(word => !usedWords[selectedLevelType][selectedLevel].includes(word));
 
     if (remainingWords.length === 0) {
         // All words have been used after filtering, update UI accordingly
@@ -245,10 +308,11 @@ function generateRandomWord() {
     const randomIndex = Math.floor(Math.random() * remainingWords.length);
     const randomWord = remainingWords[randomIndex];
 
-    usedWords[selectedLevel].push(randomWord);
+    usedWords[selectedLevelType][selectedLevel].push(randomWord);
 
     // Simplified Firebase Realtime Database update
-    set(ref(db, `${selectedLevel}/usedWords`), usedWords[selectedLevel]);
+    set(ref(db, `${selectedLevelType}/${selectedLevel}/usedWords`), usedWords[selectedLevelType][selectedLevel].slice());
+
 
     document.getElementById("randomWord").innerHTML = `<h1>${randomWord}</h1>`;
 
@@ -257,14 +321,14 @@ function generateRandomWord() {
 }
 
 
-  function resetUsedWords() {
-    for (const level in usedWords) {
-      usedWords[level] = [];
-      set(ref(db, `${level}/usedWords`), []);
-    }
+function resetUsedWords() {
+    usedWords[selectedLevelType][selectedLevel] = [];
+
+    // Simplified Firebase Realtime Database update
+    set(ref(db, `${selectedLevelType}/${selectedLevel}/usedWords`), []);
 
     updateWordList();
-  }
+}
 
 function updateWordList() {
     const currentTable = getTableForLevel(selectedLevel);
@@ -287,7 +351,7 @@ function updateWordList() {
     currentTable.classList.remove("hidden");
     currentListContainer.innerHTML = "";
 
-    const currentWords = getWordsForLevel(selectedLevel);
+    const currentWords = getWordsForLevel(selectedLevelType, selectedLevel);
 
     if (!currentWords) {
         console.error("Words for the selected level are not defined.");
@@ -327,7 +391,18 @@ function updateWordList() {
 
 
 
-function getWordsForLevel(level) {
+function getWordsForLevel(levelType, level) {
+    switch (levelType) {
+        case "primary":
+            return getPrimaryWordsForLevel(level);
+        case "intermediate":
+            return getIntermediateWordsForLevel(level);
+        default:
+            return [];
+    }
+}
+
+function getPrimaryWordsForLevel(level) {
     switch (level) {
         case "level1":
             return level1Words;
@@ -341,6 +416,25 @@ function getWordsForLevel(level) {
             return level5Words;
         case "extraWords":
             return extraWords;
+        default:
+            return [];
+    }
+}
+
+function getIntermediateWordsForLevel(level) {
+    switch (level) {
+        case "level1":
+            return ilevel1Words;
+        case "level2":
+            return ilevel2Words;
+        case "level3":
+            return ilevel3Words;
+        case "level4":
+            return ilevel4Words;
+        case "level5":
+            return ilevel5Words;
+        case "extraWords":
+            return iextraWords;
         default:
             return [];
     }
@@ -458,19 +552,22 @@ function updateWordCount() {
   }
 
   // Subscribe to changes in the Firebase database on page load
-  for (const level in usedWords) {
-    onValue(ref(db, `${level}/usedWords`), snapshot => {
-      const usedWordsFromFirebase = snapshot.val();
-      if (usedWordsFromFirebase) {
-        usedWords[level] = usedWordsFromFirebase;
-            if (usedWords[level].length > 0) {
-                const latestWord = usedWords[level][usedWords[level].length - 1];
-                document.getElementById("randomWord").innerHTML = `<h1>${latestWord}</h1>`;
+for (const levelType in usedWords) {
+    for (const level in usedWords[levelType]) {
+        onValue(ref(db, `${levelType}/${level}/usedWords`), snapshot => {
+            const usedWordsFromFirebase = snapshot.val();
+            if (usedWordsFromFirebase) {
+                usedWords[levelType][level] = usedWordsFromFirebase;
+                if (usedWords[levelType][level].length > 0) {
+                    const latestWord = usedWords[levelType][level][usedWords[levelType][level].length - 1];
+                    document.getElementById("randomWord").innerHTML = `<h1>${latestWord}</h1>`;
+                }
             }
-      }
-      updateWordList();
-    });
-  }
+            updateWordList();
+        });
+    }
+}
+
 
   // Initial update of the word list
   updateWordList();

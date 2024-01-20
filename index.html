@@ -49,7 +49,7 @@
   <label for="primaryRadio">Primary</label>
 <input type="radio" name="levelType" value="intermediate" id="intermediateRadio" onclick="updateLevelType()">
   <label for="intermediateRadio">Intermediate</label>
-
+<br><br>
 <input type="radio" name="level" value="level1" id="level1Radio" checked onclick="updateLevel()"> 
   <label for="level1Radio">Level 1</label>
 <input type="radio" name="level" value="level2" id="level2Radio" onclick="updateLevel()"> 
@@ -62,10 +62,10 @@
   <label for="level5Radio">Level 5</label>
 <input type="radio" name="level" value="extraWords" id="extraWordsRadio" onclick="updateLevel()"> 
   <label for="extraWordsRadio">Extra Words</label>
-
+<br><br>
 <button onclick="generateRandomWord()">Generate Random Word</button>
-<button onclick="resetUsedWords()">Reset Used Words</button>
-<p id="randomWord" onclick="showDefinition()"></p>
+<br>
+<p id="randomWord" onclick="toggleDefinition()"></p>
 <div id="definition" class="hidden">
   <h3>Definitions</h3>
   <table id="wordDefinitions"></table>
@@ -74,17 +74,12 @@
 </div>
 
 <h2>Word Lists</h2>
-<p id="numWordsLeft">Words Left: 0</p>
-<p id="totalNumWords">Total Words: 0</p>
 
 <table id="level1Table" class="word-list-container">
   <thead>
     <tr>
-      <th>Column 1</th>
-      <th>Column 2</th>
-      <th>Column 3</th>
-      <th>Column 4</th>
-      <th>Column 5</th>
+      <th id="selectedText1" style="text-align: center;" colspan="5">Primary Level 1</th>
+ 
     </tr>
   </thead>
   <tbody id="level1List"></tbody>
@@ -94,11 +89,7 @@
 <table id="level2Table" class="word-list-container">
   <thead>
     <tr>
-      <th>Column 1</th>
-      <th>Column 2</th>
-      <th>Column 3</th>
-      <th>Column 4</th>
-      <th>Column 5</th>
+      <th id="selectedText2" style="text-align: center;" colspan="5"></th>
     </tr>
   </thead>
   <tbody id="level2List"></tbody>
@@ -107,11 +98,8 @@
 <table id="level3Table" class="word-list-container">
   <thead>
     <tr>
-      <th>Column 1</th>
-      <th>Column 2</th>
-      <th>Column 3</th>
-      <th>Column 4</th>
-      <th>Column 5</th>
+      <th id="selectedText3" style="text-align: center;" colspan="5"></th>
+
     </tr>
   </thead>
   <tbody id="level3List"></tbody>
@@ -120,11 +108,8 @@
 <table id="level4Table" class="word-list-container">
   <thead>
     <tr>
-      <th>Column 1</th>
-      <th>Column 2</th>
-      <th>Column 3</th>
-      <th>Column 4</th>
-      <th>Column 5</th>
+      <th id="selectedText4" style="text-align: center;" colspan="5"></th>
+
     </tr>
   </thead>
   <tbody id="level4List"></tbody>
@@ -133,11 +118,8 @@
 <table id="level5Table" class="word-list-container">
   <thead>
     <tr>
-      <th>Column 1</th>
-      <th>Column 2</th>
-      <th>Column 3</th>
-      <th>Column 4</th>
-      <th>Column 5</th>
+      <th id="selectedText5" style="text-align: center;" colspan="5"></th>
+
     </tr>
   </thead>
   <tbody id="level5List"></tbody>
@@ -146,15 +128,17 @@
 <table id="extraWordsTable" class="word-list-container">
   <thead>
     <tr>
-      <th>Column 1</th>
-      <th>Column 2</th>
-      <th>Column 3</th>
-      <th>Column 4</th>
-      <th>Column 5</th>
+      <th id="selectedText6" style="text-align: center;" colspan="5"></th>
+
     </tr>
   </thead>
   <tbody id="extraWordsList"></tbody>
+
 </table>
+
+<p id="numWordsLeft">Words Left: 0</p><p id="totalNumWords">Total Words: 0</p>
+<br>
+<button onclick="resetUsedWords()">Reset Used Words</button>
 <script type="module">
   import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.4.0/firebase-app.js';
   import { getDatabase, ref, set, onValue } from 'https://www.gstatic.com/firebasejs/9.4.0/firebase-database.js';
@@ -163,7 +147,8 @@
   window.resetUsedWords = resetUsedWords;
   window.updateLevel = updateLevel;
     window.updateLevelType = updateLevelType;
-  window.showDefinition = showDefinition;
+  window.toggleDefinition = toggleDefinition;
+  window.updateSelectedText = updateSelectedText;
 
 
 const firebaseConfig = {
@@ -182,89 +167,154 @@ const firebaseConfig = {
   const db = getDatabase(firebaseApp);
 
 const level1Words = [
-  "apple", "banana", "cherry", "dog", "elephant",
-  "flower", "guitar", "happy", "igloo", "jazz",
-  "kite", "lemon", "mountain", "notebook", "orange",
-  "puzzle", "rainbow", "sun", "tiger", "umbrella"
+  "is", "boy", "cow", "for", "in",
+  "leg", "up", "you", "try", "sad",
+  "not", "art", "all", "my", "she",
+  "say", "shy", "sun", "fun", "how",
+  "job", "zoo", "buy", "fall", "egg",
+  "good", "car", "eat", "one", "will",
+  "they"
 ];
 
+
 const level2Words = [
-  "bicycle", "cactus", "diamond", "eagle", "fountain",
-  "giraffe", "happiness", "ice cream", "jungle", "kiwi",
-  "lighthouse", "magnificent", "ocean", "parrot", "quilt",
-  "rocket", "sunset", "treasure", "volcano", "waterfall"
+  "girl", "king", "want", "two", "talk",
+  "stop", "room", "out", "much", "milk",
+  "best", "lunch", "draw", "need", "word",
+  "zero", "warm", "hurt", "many", "bath",
+  "city", "cold", "first", "home", "Japan",
+  "happy", "hello", "lion", "very", "stay",
+  "small", "dish", "nice"
 ];
 
 const level3Words = [
-  "astronomy", "breathtaking", "caterpillar", "dolphin", "elegant",
-  "fantastic", "gargantuan", "harmony", "illuminate", "jubilant",
-  "kaleidoscope", "luminous", "mysterious", "nostalgia", "orchestra",
-  "phenomenal", "quintessential", "serendipity", "tranquil", "universal"
+  "five", "came", "fire", "rice", "same",
+  "time", "white", "write", "read", "again",
+  "blue", "know", "lake", "live", "grape",
+  "use", "water", "time", "eye", "three",
+  "uncle", "sport", "singer", "train", "sheep",
+  "cute", "date", "enjoy", "white", "pencil",
+  "rice", "game", "hotel"
 ];
 
 const level4Words = [
-  "ambassador", "benevolent", "cynosure", "effervescent", "fortuitous",
-  "gallant", "hierarchical", "indomitable", "juxtapose", "kaleidoscopic",
-  "labyrinthine", "mellifluous", "nepotism", "obfuscate", "philanthropy",
-  "quizzical", "resplendent", "superfluous", "ubiquitous", "verisimilitude"
+  "animal", "banana", "birthday", "classroom", "Friday",
+  "potato", "present", "school", "soup", "sweet",
+  "about", "action", "English", "among", "doctor",
+  "Earth", "bread", "brown", "children", "center",
+  "common", "cousin", "design", "flower", "father",
+  "money", "mother", "paper", "outside", "orange",
+  "plant"
 ];
+
 
 const level5Words = [
-  "acquiesce", "belligerent", "cacophony", "deleterious", "ephemeral",
-  "facetious", "gregarious", "hirsute", "iconoclast", "juxtaposition",
-  "kowtow", "lugubrious", "mellifluous", "nonchalant", "obfuscate",
-  "paradigm", "quixotic", "recalcitrant", "sycophant", "ubiquitous"
+  "season", "beautiful", "swimming", "teacher", "because",
+  "between", "afternoon", "friend", "fruit", "important",
+  "kitchen", "library", "light", "vegetable", "sometimes",
+  "question", "please", "people", "night", "office"
 ];
 
+
 const extraWords = [
-  "effulgent", "bibliopole", "susurrus", "gallimaufry", "discombobulate",
-  "limerence", "recumbentibus", "sesquipedalian", "vicissitude", "mellisonant",
-  "perfidious", "quidnunc", "soliloquy", "verisimilitude", "xenodochial",
-  "zydeco", "prestidigitation", "sesquipedalian", "uliginous", "zyzzyva"
+  "sky", "wow", "hug", "snap", "tape",
+  "sips", "hard", "why", "first", "tide",
+  "bow", "back", "find", "name", "oops",
+  "more", "toss", "chin", "park", "bike",
+  "nest", "rude", "deal", "store", "roads",
+  "cool", "wake", "vase", "tune", "coat",
+  "four", "block", "heap", "ladder", "tug",
+  "spoon", "spark", "later", "hair", "open",
+  "this", "his", "May", "grid", "wag",
+  "near", "zip", "rug", "dots", "pat",
+  "pole", "snake", "mound", "smaller", "grand",
+  "gross", "wish", "stove", "join", "state",
+  "enter", "blank", "give", "other", "bedroom",
+  "branch", "letter", "spring", "dance", "front",
+  "roast", "brave", "bright", "scream", "river",
+  "bride", "stall", "point", "wedding", "little",
+  "doctor", "peel", "snack", "notebook", "brain",
+  "pride", "dear", "live", "tubes", "cloth",
+  "gazed", "mile", "float", "snail", "second",
+  "drew"
 ];
+
 
 
 const ilevel1Words = [
-  "apple", "banana", "cherry", "dog", "elephant",
-  "flower", "guitar", "happy", "igloo", "jazz",
-  "kite", "lemon", "mountain", "notebook", "orange",
-  "puzzle", "rainbow", "sun", "tiger", "umbrella"
+  "queen", "nurse", "attach", "climb", "curry",
+  "mayor", "wrong", "would", "whose", "weight",
+  "science", "scene", "throat", "exciting", "excuse",
+  "guess", "guitar", "bridge", "famous", "pigeon",
+  "volcano", "penguin", "lettuce", "engage", "donate",
+  "alert", "holy", "sneak", "stale", "novel"
 ];
 
 const ilevel2Words = [
-  "bicycle", "cactus", "diamond", "eagle", "fountain",
-  "giraffe", "happiness", "ice cream", "jungle", "kiwi",
-  "lighthouse", "magnificent", "ocean", "parrot", "quilt",
-  "rocket", "sunset", "treasure", "volcano", "waterfall"
+  "aquarium", "autumn", "beautiful", "delicious", "dictionary",
+  "favorite", "island", "straight", "shoulder", "wrestling",
+  "against", "serious", "theater", "weather", "surgery",
+  "pottery", "museum", "scorpion", "foreign", "feature",
+  "favorite", "parasite", "genius", "archery", "recess",
+  "faith", "salute", "herald", "humble", "brutal", "fluid"
 ];
+
 
 const ilevel3Words = [
-  "astronomy", "breathtaking", "caterpillar", "dolphin", "elegant",
-  "fantastic", "gargantuan", "harmony", "illuminate", "jubilant",
-  "kaleidoscope", "luminous", "mysterious", "nostalgia", "orchestra",
-  "phenomenal", "quintessential", "serendipity", "tranquil", "universal"
+  "musician", "spaghetti", "society", "ceramics", "tomorrow",
+  "pleasure", "enough", "national", "severe", "physical",
+  "irregular", "substitute", "designer", "condemn", "breakfast",
+  "bought", "couple", "decrease", "situation", "justice",
+  "twilight", "emerald", "accurate", "whiskers", "yogurt",
+  "complicate", "artificial", "bribe", "certify", "adorable", "obedient",
+  "tuition", "hotel"
 ];
+
 
 const ilevel4Words = [
-  "ambassador", "benevolent", "cynosure", "effervescent", "fortuitous",
-  "gallant", "hierarchical", "indomitable", "juxtapose", "kaleidoscopic",
-  "labyrinthine", "mellifluous", "nepotism", "obfuscate", "philanthropy",
-  "quizzical", "resplendent", "superfluous", "ubiquitous", "verisimilitude"
+  "technology", "neighbor", "economics", "stomachache", "eczema",
+  "vandalize", "patience", "difficult", "delicious", "restaurant",
+  "marvelous", "genuine", "headache", "Godzilla", "language",
+  "diversity", "scripture", "Einstein", "twelfth", "twentieth",
+  "university", "weather", "hostile", "encounter", "emission",
+  "suspicious", "commercial", "cautious", "charitable", "character",
+  "shipment", "confession"
 ];
+
 
 const ilevel5Words = [
-  "acquiesce", "belligerent", "cacophony", "deleterious", "ephemeral",
-  "facetious", "gregarious", "hirsute", "iconoclast", "juxtaposition",
-  "kowtow", "lugubrious", "mellifluous", "nonchalant", "obfuscate",
-  "paradigm", "quixotic", "recalcitrant", "sycophant", "ubiquitous"
+  "orientation", "professional", "photographer", "necessary", "planetarium",
+  "throughout", "tenaciously", "eucalyptus", "exhibition", "evacuation",
+  "constellation", "membership", "vaccination", "performance", "harmonious",
+  "glacier", "discreetly", "capacity", "resilience", "audience",
+  "demonstrate", "disastrous", "encyclopedia", "circulation", "scheme",
+  "possession", "scholarship", "agricultural", "vegetation", "consultation"
 ];
 
+
 const iextraWords = [
-  "effulgent", "bibliopole", "susurrus", "gallimaufry", "discombobulate",
-  "limerence", "recumbentibus", "sesquipedalian", "vicissitude", "mellisonant",
-  "perfidious", "quidnunc", "soliloquy", "verisimilitude", "xenodochial",
-  "zydeco", "prestidigitation", "sesquipedalian", "uliginous", "zyzzyva"
+  "bronze", "flea", "buckeye", "sudsy", "antlers",
+  "dapper", "stroll", "cress", "bestie", "cereal",
+  "silence", "fury", "howdy", "important", "popovers",
+  "thousand", "razor", "roughly", "drawl", "oddity",
+  "insult", "valley", "gather", "dessert", "stagecoach",
+  "peaceful", "ailment", "combat", "rotten", "expressway",
+  "practice", "squash", "amused", "pouch", "outfits",
+  "sewing", "transform", "marble", "gallon", "flitting",
+  "plaza", "yesterday", "nighttime", "putty", "glumly",
+  "ignore", "improve", "Internet", "pantry", "hungrily",
+  "confident", "vision", "diamond", "stitchery", "fiddlehead",
+  "hobbit", "doughnut", "precious", "wafting", "occupy",
+  "Afrobeat", "termite", "insulation", "intertwine", "recital",
+  "furniture", "ambush", "squire", "submerged", "saucer",
+  "gloaming", "engulf", "graduate", "fascinated", "composition",
+  "wisdom", "ourselves", "invisible", "completely", "poisonous",
+  "intimidate", "drawers", "disdain", "deliberately", "spacious",
+  "forearms", "gratitude", "appreciation", "devotion", "inscription",
+  "inventory", "wheezy", "possible", "replace", "crookedly",
+  "fragrant", "fowl", "responsible", "awfully", "manual"
 ];
+
 
 window.primaryLevelWords = {
   level1: level1Words,
@@ -451,20 +501,14 @@ function getListContainerForLevel(level) {
 function updateWordCount() {
     let numWordsLeft, totalNumWords;
 
-    if (selectedLevel === "extraWords") {
-        numWordsLeft = window[selectedLevelType][selectedLevel].length - usedWords[selectedLevelType][selectedLevel].length;
-        totalNumWords = window[selectedLevelType][selectedLevel].length;
-    } else {
-        const currentWords = getWordsForLevel(selectedLevelType, selectedLevel);
-        if (!currentWords) {
-            console.error("Words for the selected level are not defined.");
-            return;
-        }
+const currentWords = getWordsForLevel(selectedLevelType, selectedLevel);
+if (!currentWords) {
+    console.error("Words for the selected level are not defined.");
+    return;
+}
 
-        numWordsLeft = currentWords.length - usedWords[selectedLevelType][selectedLevel].length;
-        totalNumWords = currentWords.length;
-    }
-
+numWordsLeft = currentWords.length - usedWords[selectedLevelType][selectedLevel].length;
+totalNumWords = currentWords.length;
     document.getElementById("numWordsLeft").textContent = `Words Left: ${numWordsLeft}`;
     document.getElementById("totalNumWords").textContent = `Total Words: ${totalNumWords}`;
 }
@@ -472,11 +516,13 @@ function updateWordCount() {
 
   function updateLevel() {
     selectedLevel = document.querySelector('input[name="level"]:checked').value;
+updateSelectedText();
     updateWordList();
   }
 
   function updateLevelType() {
     selectedLevelType = document.querySelector('input[name="levelType"]:checked').value;
+updateSelectedText();
     updateWordList();
 }
 
@@ -506,6 +552,21 @@ function updateWordCount() {
     .catch(error => {
       console.error("Error fetching data from WordsAPI:", error);
     });
+  }
+
+  function toggleDefinition() {
+    const definitionDiv = document.getElementById("definition");
+
+    if (definitionDiv.classList.contains("hidden")) {
+      showDefinition();
+    } else {
+      hideDefinition();
+    }
+  }
+
+  function hideDefinition() {
+    const definitionDiv = document.getElementById("definition");
+    definitionDiv.classList.add("hidden");
   }
 
   function showDefinitionAndExamples(definitions, examples) {
@@ -557,6 +618,51 @@ for (const levelType in usedWords) {
 
   // Initial update of the word list
   updateWordList();
+
+    function updateSelectedText() {
+      // Get the radio button elements by name
+      var radioLevelType = document.getElementsByName('levelType');
+      var radiolevel = document.getElementsByName('level');       
+      var showtext = "";
+      // Loop through radio buttons to find the selected one
+      for (var i = 0; i < radioLevelType.length; i++) {
+        if (radioLevelType[i].checked) {
+          // Update the content of the <td> with the selected radio button's text
+          showtext = radioLevelType[i].labels[0].innerText;
+          break; // Exit the loop once a selected radio button is found
+        }
+      }
+      
+      var radioLevelcomp="";
+
+      for (var i = 0; i < radiolevel.length; i++) {
+        if (radiolevel[i].checked) {
+          // Update the content of the <td> with the selected radio button's text
+          showtext = showtext + " " + radiolevel[i].labels[0].innerText;
+          radioLevelcomp = radiolevel[i].value;
+          break; // Exit the loop once a selected radio button is found
+        }
+      }
+      if (radioLevelcomp == "level1") {
+       	document.getElementById('selectedText1').innerText = showtext;
+      }    
+      if (radioLevelcomp == "level2") {
+       	document.getElementById('selectedText2').innerText = showtext;
+      }   
+      if (radioLevelcomp == "level3") {
+       	document.getElementById('selectedText3').innerText = showtext;
+      }   
+      if (radioLevelcomp == "level4") {
+       	document.getElementById('selectedText4').innerText = showtext;
+      }   
+      if (radioLevelcomp == "level5") {
+       	document.getElementById('selectedText5').innerText = showtext;
+      }   
+      if (radioLevelcomp == "extraWords") {
+       	document.getElementById('selectedText6').innerText = showtext;
+      }       
+    }
+
 </script>
 
 </body>

@@ -1,0 +1,750 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Random Word Selector</title>
+  <style>
+   body {
+  font-family: Arial, sans-serif;
+  text-align: center;
+  margin: 20px;
+  background-color: lightblue; /* Add this line to set the background color */
+
+}
+
+/* Add media query for smaller screens */
+@media only screen and (max-width: 600px) {
+  body {
+    margin: 10px;
+  }
+
+  table {
+    width: 100%;
+  }
+
+  th, td {
+    font-size: 14px;
+    padding: 6px;
+  }
+
+  h1 {
+    font-size: 24px;
+  }
+
+  #definition h3 {
+    font-size: 18px;
+  }
+}
+
+table {
+  width: 80%;
+  margin: 20px auto;
+  border-collapse: collapse;
+}
+
+th, td {
+  border: 1px solid #ddd;
+  padding: 10px;
+  text-align: left;
+}
+
+th {
+  background-color: #f2f2f2;
+}
+
+.used {
+  text-decoration: line-through;
+  color: #999;
+}
+
+.hidden {
+  display: none;
+}
+
+#definition {
+  margin-top: 20px;
+}
+
+/* Add styles for radio buttons and labels */
+input[type="radio"] {
+  margin-right: 5px;
+}
+
+label {
+  font-size: 16px;
+}
+
+/* Add styles for buttons */
+button {
+  padding: 10px;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+/* Add styles for the selected text */
+#selectedText1, #selectedText2, #selectedText3, #selectedText4, #selectedText5, #selectedText6 {
+  font-size: 18px;
+}
+
+/* Add styles for the word lists */
+.word-list-container {
+  margin-top: 20px;
+}
+
+.word-list-container td {
+  font-size: 16px;
+}
+
+#numWordsLeft, #totalNumWords {
+  font-size: 16px;
+  margin-bottom: 10px;
+}
+
+/* Add styles for the reset button */
+#resetButton {
+  margin-top: 10px;
+}
+
+/* Add styles for the Firebase logo */
+.firebase-logo {
+  width: 80px;
+  height: auto;
+  margin-top: 10px;
+}
+/* Add this to your existing styles or adjust as needed */
+img {
+  max-width: 100%;
+  height: auto;
+  margin-bottom: 20px; /* Adjust margin as needed */
+}
+
+  </style>
+</head>
+<body>
+<img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSI4DfXLHcE8_VPq3kZY8kVDU5xWJl0AsUAZQ&usqp=CAU" alt="Random Word Selector Image" style="max-width: 100%;">
+
+<h1>Random Word Selector</h1>
+
+<input type="radio" name="levelType" value="primary" id="primaryRadio" checked onclick="updateLevelType()">
+  <label for="primaryRadio">Primary</label>
+<input type="radio" name="levelType" value="intermediate" id="intermediateRadio" onclick="updateLevelType()">
+  <label for="intermediateRadio">Intermediate</label>
+<br><br>
+<input type="radio" name="level" value="level1" id="level1Radio" checked onclick="updateLevel()"> 
+  <label for="level1Radio">Level 1</label>
+<input type="radio" name="level" value="level2" id="level2Radio" onclick="updateLevel()"> 
+  <label for="level2Radio">Level 2</label>
+<input type="radio" name="level" value="level3" id="level3Radio" onclick="updateLevel()"> 
+  <label for="level3Radio">Level 3</label>
+<input type="radio" name="level" value="level4" id="level4Radio" onclick="updateLevel()"> 
+  <label for="level4Radio">Level 4</label>
+<input type="radio" name="level" value="level5" id="level5Radio" onclick="updateLevel()"> 
+  <label for="level5Radio">Level 5</label>
+<input type="radio" name="level" value="extraWords" id="extraWordsRadio" onclick="updateLevel()"> 
+  <label for="extraWordsRadio">Extra Words</label>
+<br><br>
+<button onclick="generateRandomWord()">Select a Random Word</button>
+<br>
+<p id="randomWord" onclick="toggleDefinition()"></p>
+<div id="definition" class="hidden">
+  <h3>Definitions</h3>
+  <table id="wordDefinitions"></table>
+  <h3>Examples</h3>
+  <table id="wordExamples"></table>
+</div>
+
+<h2>Word Lists</h2>
+
+<table id="level1Table" class="word-list-container">
+  <thead>
+    <tr>
+      <th id="selectedText1" style="text-align: center;" colspan="5">Primary Level 1</th>
+ 
+    </tr>
+  </thead>
+  <tbody id="level1List"></tbody>
+</table>
+
+<!-- Add similar tables for other levels (level2Table, level3Table, etc.) -->
+<table id="level2Table" class="word-list-container">
+  <thead>
+    <tr>
+      <th id="selectedText2" style="text-align: center;" colspan="5"></th>
+    </tr>
+  </thead>
+  <tbody id="level2List"></tbody>
+</table>
+
+<table id="level3Table" class="word-list-container">
+  <thead>
+    <tr>
+      <th id="selectedText3" style="text-align: center;" colspan="5"></th>
+
+    </tr>
+  </thead>
+  <tbody id="level3List"></tbody>
+</table>
+
+<table id="level4Table" class="word-list-container">
+  <thead>
+    <tr>
+      <th id="selectedText4" style="text-align: center;" colspan="5"></th>
+
+    </tr>
+  </thead>
+  <tbody id="level4List"></tbody>
+</table>
+
+<table id="level5Table" class="word-list-container">
+  <thead>
+    <tr>
+      <th id="selectedText5" style="text-align: center;" colspan="5"></th>
+
+    </tr>
+  </thead>
+  <tbody id="level5List"></tbody>
+</table>
+
+<table id="extraWordsTable" class="word-list-container">
+  <thead>
+    <tr>
+      <th id="selectedText6" style="text-align: center;" colspan="5"></th>
+
+    </tr>
+  </thead>
+  <tbody id="extraWordsList"></tbody>
+
+</table>
+
+<p id="numWordsLeft">Words Left: 0</p><p id="totalNumWords">Total Words: 0</p>
+<br>
+<button onclick="resetUsedWords()">Reset Used Words</button>
+<script type="module">
+  import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.4.0/firebase-app.js';
+  import { getDatabase, ref, set, onValue } from 'https://www.gstatic.com/firebasejs/9.4.0/firebase-database.js';
+  
+  window.generateRandomWord = generateRandomWord;
+  window.resetUsedWords = resetUsedWords;
+  window.updateLevel = updateLevel;
+    window.updateLevelType = updateLevelType;
+  window.toggleDefinition = toggleDefinition;
+  window.updateSelectedText = updateSelectedText;
+
+
+const firebaseConfig = {
+  apiKey: "AIzaSyAjBQR3CIyFe2B3X764vUAlgZBBv6MXWxU",
+  authDomain: "spelling-f0a67.firebaseapp.com",
+  databaseURL: "https://spelling-f0a67-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "spelling-f0a67",
+  storageBucket: "spelling-f0a67.appspot.com",
+  messagingSenderId: "417568436363",
+  appId: "1:417568436363:web:f2815fd681ccfaf640a48e",
+  measurementId: "G-82924CD1JX"
+};
+
+  // Initialize Firebase
+  const firebaseApp = initializeApp(firebaseConfig);
+  const db = getDatabase(firebaseApp);
+
+const level1Words = [
+  "is", "boy", "cow", "for", "in",
+  "leg", "up", "you", "try", "sad",
+  "not", "art", "all", "my", "she",
+  "say", "shy", "sun", "fun", "how",
+  "job", "zoo", "buy", "fall", "egg",
+  "good", "car", "eat", "one", "will",
+  "they"
+];
+
+
+const level2Words = [
+  "girl", "king", "want", "two", "talk",
+  "stop", "room", "out", "much", "milk",
+  "best", "lunch", "draw", "need", "word",
+  "zero", "warm", "hurt", "many", "bath",
+  "city", "cold", "first", "home", "Japan",
+  "happy", "hello", "lion", "very", "stay",
+  "small", "dish", "nice"
+];
+
+const level3Words = [
+  "five", "came", "fire", "rice", "same",
+  "time", "white", "write", "read", "again",
+  "blue", "know", "lake", "live", "grape",
+  "use", "water", "time", "eye", "three",
+  "uncle", "sport", "singer", "train", "sheep",
+  "cute", "date", "enjoy", "white", "pencil",
+  "rice", "game", "hotel"
+];
+
+const level4Words = [
+  "animal", "banana", "birthday", "classroom", "Friday",
+  "potato", "present", "school", "soup", "sweet",
+  "about", "action", "English", "among", "doctor",
+  "Earth", "bread", "brown", "children", "center",
+  "common", "cousin", "design", "flower", "father",
+  "money", "mother", "paper", "outside", "orange",
+  "plant"
+];
+
+
+const level5Words = [
+  "season", "beautiful", "swimming", "teacher", "because",
+  "between", "afternoon", "friend", "fruit", "important",
+  "kitchen", "library", "light", "vegetable", "sometimes",
+  "question", "please", "people", "night", "office"
+];
+
+
+const extraWords = [
+  "sky", "wow", "hug", "snap", "tape",
+  "sips", "hard", "why", "first", "tide",
+  "bow", "back", "find", "name", "oops",
+  "more", "toss", "chin", "park", "bike",
+  "nest", "rude", "deal", "store", "roads",
+  "cool", "wake", "vase", "tune", "coat",
+  "four", "block", "heap", "ladder", "tug",
+  "spoon", "spark", "later", "hair", "open",
+  "this", "his", "May", "grid", "wag",
+  "near", "zip", "rug", "dots", "pat",
+  "pole", "snake", "mound", "smaller", "grand",
+  "gross", "wish", "stove", "join", "state",
+  "enter", "blank", "give", "other", "bedroom",
+  "branch", "letter", "spring", "dance", "front",
+  "roast", "brave", "bright", "scream", "river",
+  "bride", "stall", "point", "wedding", "little",
+  "doctor", "peel", "snack", "notebook", "brain",
+  "pride", "dear", "live", "tubes", "cloth",
+  "gazed", "mile", "float", "snail", "second",
+  "drew"
+];
+
+
+
+const ilevel1Words = [
+  "queen", "nurse", "attach", "climb", "curry",
+  "mayor", "wrong", "would", "whose", "weight",
+  "science", "scene", "throat", "exciting", "excuse",
+  "guess", "guitar", "bridge", "famous", "pigeon",
+  "volcano", "penguin", "lettuce", "engage", "donate",
+  "alert", "holy", "sneak", "stale", "novel"
+];
+
+const ilevel2Words = [
+  "aquarium", "autumn", "beautiful", "delicious", "dictionary",
+  "favorite", "island", "straight", "shoulder", "wrestling",
+  "against", "serious", "theater", "weather", "surgery",
+  "pottery", "museum", "scorpion", "foreign", "feature",
+  "favorite", "parasite", "genius", "archery", "recess",
+  "faith", "salute", "herald", "humble", "brutal", "fluid"
+];
+
+
+const ilevel3Words = [
+  "musician", "spaghetti", "society", "ceramics", "tomorrow",
+  "pleasure", "enough", "national", "severe", "physical",
+  "irregular", "substitute", "designer", "condemn", "breakfast",
+  "bought", "couple", "decrease", "situation", "justice",
+  "twilight", "emerald", "accurate", "whiskers", "yogurt",
+  "complicate", "artificial", "bribe", "certify", "adorable", "obedient",
+  "tuition", "hotel"
+];
+
+
+const ilevel4Words = [
+  "technology", "neighbor", "economics", "stomachache", "eczema",
+  "vandalize", "patience", "difficult", "delicious", "restaurant",
+  "marvelous", "genuine", "headache", "Godzilla", "language",
+  "diversity", "scripture", "Einstein", "twelfth", "twentieth",
+  "university", "weather", "hostile", "encounter", "emission",
+  "suspicious", "commercial", "cautious", "charitable", "character",
+  "shipment", "confession"
+];
+
+
+const ilevel5Words = [
+  "orientation", "professional", "photographer", "necessary", "planetarium",
+  "throughout", "tenaciously", "eucalyptus", "exhibition", "evacuation",
+  "constellation", "membership", "vaccination", "performance", "harmonious",
+  "glacier", "discreetly", "capacity", "resilience", "audience",
+  "demonstrate", "disastrous", "encyclopedia", "circulation", "scheme",
+  "possession", "scholarship", "agricultural", "vegetation", "consultation"
+];
+
+
+const iextraWords = [
+  "bronze", "flea", "buckeye", "sudsy", "antlers",
+  "dapper", "stroll", "cress", "bestie", "cereal",
+  "silence", "fury", "howdy", "important", "popovers",
+  "thousand", "razor", "roughly", "drawl", "oddity",
+  "insult", "valley", "gather", "dessert", "stagecoach",
+  "peaceful", "ailment", "combat", "rotten", "expressway",
+  "practice", "squash", "amused", "pouch", "outfits",
+  "sewing", "transform", "marble", "gallon", "flitting",
+  "plaza", "yesterday", "nighttime", "putty", "glumly",
+  "ignore", "improve", "Internet", "pantry", "hungrily",
+  "confident", "vision", "diamond", "stitchery", "fiddlehead",
+  "hobbit", "doughnut", "precious", "wafting", "occupy",
+  "Afrobeat", "termite", "insulation", "intertwine", "recital",
+  "furniture", "ambush", "squire", "submerged", "saucer",
+  "gloaming", "engulf", "graduate", "fascinated", "composition",
+  "wisdom", "ourselves", "invisible", "completely", "poisonous",
+  "intimidate", "drawers", "disdain", "deliberately", "spacious",
+  "forearms", "gratitude", "appreciation", "devotion", "inscription",
+  "inventory", "wheezy", "possible", "replace", "crookedly",
+  "fragrant", "fowl", "responsible", "awfully", "manual"
+];
+
+
+window.primaryLevelWords = {
+  level1: level1Words,
+  level2: level2Words,
+  level3: level3Words,
+  level4: level4Words,
+  level5: level5Words,
+  extraWords: extraWords
+};
+
+window.iintermediateLevelWords = {
+  level1: ilevel1Words,
+  level2: ilevel2Words,
+  level3: ilevel3Words,
+  level4: ilevel4Words,
+  level5: ilevel5Words,
+  extraWords: iextraWords
+};
+
+
+
+
+ let selectedLevelType = "primary";
+  let selectedLevel = "level1";
+const usedWords = { 
+    primary: { level1: [], level2: [], level3: [], level4: [], level5: [], extraWords: [] }, 
+    intermediate: { level1: [], level2: [], level3: [], level4: [], level5: [], extraWords: [] } 
+  };
+
+
+function generateRandomWord() {
+    const currentWords = getWordsForLevel(selectedLevelType, selectedLevel);
+
+
+    if (!currentWords || usedWords[selectedLevelType][selectedLevel].length === currentWords.length) {
+        document.getElementById("randomWord").innerHTML = "<h1>All words have been used!</h1>";
+        return;
+    }
+
+    const remainingWords = currentWords.filter(word => !usedWords[selectedLevelType][selectedLevel].includes(word));
+
+    if (remainingWords.length === 0) {
+        // All words have been used after filtering, update UI accordingly
+        document.getElementById("randomWord").innerHTML = "<h1>All words have been used!</h1>";
+        return;
+    }
+
+    const randomIndex = Math.floor(Math.random() * remainingWords.length);
+    const randomWord = remainingWords[randomIndex];
+
+    usedWords[selectedLevelType][selectedLevel].push(randomWord);
+
+    // Simplified Firebase Realtime Database update
+    set(ref(db, `${selectedLevelType}/${selectedLevel}/usedWords`), usedWords[selectedLevelType][selectedLevel].slice());
+
+
+    document.getElementById("randomWord").innerHTML = `<h1>${randomWord}</h1>`;
+
+    document.getElementById("definition").classList.add("hidden");
+    updateWordList();
+}
+
+
+function resetUsedWords() {
+    usedWords[selectedLevelType][selectedLevel] = [];
+
+    // Simplified Firebase Realtime Database update
+    set(ref(db, `${selectedLevelType}/${selectedLevel}/usedWords`), []);
+
+    updateWordList();
+}
+
+function updateWordList() {
+
+    const currentTable = getTableForLevel(selectedLevel);
+    const currentListContainer = getListContainerForLevel(selectedLevel);
+
+    if (!currentTable || !currentListContainer) {
+        console.error("Table, list container, or words for the selected level are not defined.");
+        return;
+    }
+
+    // Hide all tables
+    document.querySelectorAll('table[id^="level"]').forEach(table => {
+        table.classList.add("hidden");
+    });
+
+       document.querySelectorAll('table[id^="extraWords"]').forEach(table => {
+        table.classList.add("hidden");
+    });
+
+    currentTable.classList.remove("hidden");
+    currentListContainer.innerHTML = "";
+
+    const currentWords = getWordsForLevel(selectedLevelType, selectedLevel);
+
+    if (!currentWords) {
+        console.error("Words for the selected level are not defined.");
+        return;
+    }
+
+    const words = currentWords.sort();
+    const numColumns = 5;
+    const numRows = Math.ceil(words.length / numColumns);
+
+    for (let row = 0; row < numRows; row++) {
+        const tr = document.createElement("tr");
+
+        for (let col = 0; col < numColumns; col++) {
+            const index = row * numColumns + col;
+            if (index < words.length) {
+                const word = words[index];
+                const td = document.createElement("td");
+
+                if (usedWords[selectedLevelType][selectedLevel].includes(word)) {
+                    td.innerHTML = `<span class="used">${word}</span>`;
+                } else {
+                    td.textContent = word;
+                }
+
+                tr.appendChild(td);
+            }
+        }
+
+        currentListContainer.appendChild(tr);
+    }
+
+    updateWordCount();
+}
+
+
+
+
+
+function getWordsForLevel(levelType, level) {
+    switch (levelType) {
+        case "primary":
+            return window[`${levelType}LevelWords`][level];
+        case "intermediate":
+            return window[`i${levelType}LevelWords`][level];
+        default:
+            return window[levelType + "Words"];
+    }
+}
+
+function getTableForLevel(level) {
+    switch (level) {
+        case "level1":
+            return document.getElementById("level1Table");
+        case "level2":
+            return document.getElementById("level2Table");
+        case "level3":
+            return document.getElementById("level3Table");
+        case "level4":
+            return document.getElementById("level4Table");
+        case "level5":
+            return document.getElementById("level5Table");
+        case "extraWords":
+            return document.getElementById("extraWordsTable");
+        default:
+            return null;
+    }
+}
+
+function getListContainerForLevel(level) {
+    switch (level) {
+        case "level1":
+            return document.getElementById("level1List");
+        case "level2":
+            return document.getElementById("level2List");
+        case "level3":
+            return document.getElementById("level3List");
+        case "level4":
+            return document.getElementById("level4List");
+        case "level5":
+            return document.getElementById("level5List");
+        case "extraWords":
+            return document.getElementById("extraWordsList");
+        default:
+            return null;
+    }
+}
+
+function updateWordCount() {
+    let numWordsLeft, totalNumWords;
+
+const currentWords = getWordsForLevel(selectedLevelType, selectedLevel);
+if (!currentWords) {
+    console.error("Words for the selected level are not defined.");
+    return;
+}
+
+numWordsLeft = currentWords.length - usedWords[selectedLevelType][selectedLevel].length;
+totalNumWords = currentWords.length;
+    document.getElementById("numWordsLeft").textContent = `Words Left: ${numWordsLeft}`;
+    document.getElementById("totalNumWords").textContent = `Total Words: ${totalNumWords}`;
+}
+
+
+  function updateLevel() {
+    selectedLevel = document.querySelector('input[name="level"]:checked').value;
+updateSelectedText();
+    updateWordList();
+  }
+
+  function updateLevelType() {
+    selectedLevelType = document.querySelector('input[name="levelType"]:checked').value;
+updateSelectedText();
+    updateWordList();
+}
+
+  function showDefinition() {
+    const randomWord = document.getElementById("randomWord").textContent;
+
+    fetch(`https://wordsapiv1.p.rapidapi.com/words/${randomWord}`, {
+      method: "GET",
+      headers: {
+        "X-RapidAPI-Host": "wordsapiv1.p.rapidapi.com",
+        "X-RapidAPI-Key": "06f20456cfmsh1b8e00ea9fb360dp1243b0jsn77475ae1802e"
+     }
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data && data.results && data.results.length > 0) {
+        const definitions = data.results.map(result => result.definition).filter(Boolean);
+        const examples = data.results.map(result => result.examples).flat().filter(Boolean);
+
+        showDefinitionAndExamples(definitions, examples);
+      } else {
+        document.getElementById("definition").classList.remove("hidden");
+        document.getElementById("wordDefinitions").innerHTML = "<tr><td>No definitions available.</td></tr>";
+        document.getElementById("wordExamples").innerHTML = "<tr><td>No examples available.</td></tr>";
+      }
+    })
+    .catch(error => {
+      console.error("Error fetching data from WordsAPI:", error);
+    });
+  }
+
+  function toggleDefinition() {
+    const definitionDiv = document.getElementById("definition");
+
+    if (definitionDiv.classList.contains("hidden")) {
+      showDefinition();
+    } else {
+      hideDefinition();
+    }
+  }
+
+  function hideDefinition() {
+    const definitionDiv = document.getElementById("definition");
+    definitionDiv.classList.add("hidden");
+  }
+
+  function showDefinitionAndExamples(definitions, examples) {
+    const wordDefinitionsContainer = document.getElementById("wordDefinitions");
+    const wordExamplesContainer = document.getElementById("wordExamples");
+
+    wordDefinitionsContainer.innerHTML = "";
+    wordExamplesContainer.innerHTML = "";
+
+    for (const definition of definitions) {
+      const tr = document.createElement("tr");
+      const td = document.createElement("td");
+      td.textContent = definition;
+      tr.appendChild(td);
+      wordDefinitionsContainer.appendChild(tr);
+    }
+
+    for (const example of examples.slice(0, 5)) {
+      const tr = document.createElement("tr");
+      const td = document.createElement("td");
+      td.textContent = example;
+      tr.appendChild(td);
+      wordExamplesContainer.appendChild(tr);
+    }
+
+    document.getElementById("definition").classList.remove("hidden");
+  }
+
+  // Subscribe to changes in the Firebase database on page load
+// Subscribe to changes in the Firebase database on page load
+for (const levelType in usedWords) {
+    for (const level in usedWords[levelType]) {
+        (function (currentLevelType, currentLevel) {
+            onValue(ref(db, `${currentLevelType}/${currentLevel}/usedWords`), snapshot => {
+                const usedWordsFromFirebase = snapshot.val();
+                if (usedWordsFromFirebase) {
+                    usedWords[currentLevelType][currentLevel] = usedWordsFromFirebase;
+                    if (usedWords[currentLevelType][currentLevel].length > 0) {
+                        const latestWord = usedWords[currentLevelType][currentLevel][usedWords[currentLevelType][currentLevel].length - 1];
+                        document.getElementById("randomWord").innerHTML = `<h1>${latestWord}</h1>`;
+                    }
+                }
+                updateWordList();
+            });
+        })(levelType, level);
+    }
+}
+
+
+  // Initial update of the word list
+  updateWordList();
+
+    function updateSelectedText() {
+      // Get the radio button elements by name
+      var radioLevelType = document.getElementsByName('levelType');
+      var radiolevel = document.getElementsByName('level');       
+      var showtext = "";
+      // Loop through radio buttons to find the selected one
+      for (var i = 0; i < radioLevelType.length; i++) {
+        if (radioLevelType[i].checked) {
+          // Update the content of the <td> with the selected radio button's text
+          showtext = radioLevelType[i].labels[0].innerText;
+          break; // Exit the loop once a selected radio button is found
+        }
+      }
+      
+      var radioLevelcomp="";
+
+      for (var i = 0; i < radiolevel.length; i++) {
+        if (radiolevel[i].checked) {
+          // Update the content of the <td> with the selected radio button's text
+          showtext = showtext + " " + radiolevel[i].labels[0].innerText;
+          radioLevelcomp = radiolevel[i].value;
+          break; // Exit the loop once a selected radio button is found
+        }
+      }
+      if (radioLevelcomp == "level1") {
+       	document.getElementById('selectedText1').innerText = showtext;
+      }    
+      if (radioLevelcomp == "level2") {
+       	document.getElementById('selectedText2').innerText = showtext;
+      }   
+      if (radioLevelcomp == "level3") {
+       	document.getElementById('selectedText3').innerText = showtext;
+      }   
+      if (radioLevelcomp == "level4") {
+       	document.getElementById('selectedText4').innerText = showtext;
+      }   
+      if (radioLevelcomp == "level5") {
+       	document.getElementById('selectedText5').innerText = showtext;
+      }   
+      if (radioLevelcomp == "extraWords") {
+       	document.getElementById('selectedText6').innerText = showtext;
+      }       
+    }
+
+</script>
+
+</body>
+</html>

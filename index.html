@@ -5,43 +5,124 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Random Word Selector</title>
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      text-align: center;
-      margin: 50px;
-    }
+   body {
+  font-family: Arial, sans-serif;
+  text-align: center;
+  margin: 20px;
+  background-color: lightblue; /* Add this line to set the background color */
 
-    table {
-      width: 80%;
-      margin: 20px auto;
-      border-collapse: collapse;
-    }
+}
 
-    th, td {
-      border: 1px solid #ddd;
-      padding: 8px;
-      text-align: left;
-    }
+/* Add media query for smaller screens */
+@media only screen and (max-width: 600px) {
+  body {
+    margin: 10px;
+  }
 
-    th {
-      background-color: #f2f2f2;
-    }
+  table {
+    width: 100%;
+  }
 
-    .used {
-      text-decoration: line-through;
-      color: #999;
-    }
+  th, td {
+    font-size: 14px;
+    padding: 6px;
+  }
 
-    .hidden {
-      display: none;
-    }
+  h1 {
+    font-size: 24px;
+  }
 
-    #definition {
-      margin-top: 20px;
-    }
+  #definition h3 {
+    font-size: 18px;
+  }
+}
+
+table {
+  width: 80%;
+  margin: 20px auto;
+  border-collapse: collapse;
+}
+
+th, td {
+  border: 1px solid #ddd;
+  padding: 10px;
+  text-align: left;
+}
+
+th {
+  background-color: #f2f2f2;
+}
+
+.used {
+  text-decoration: line-through;
+  color: #999;
+}
+
+.hidden {
+  display: none;
+}
+
+#definition {
+  margin-top: 20px;
+}
+
+/* Add styles for radio buttons and labels */
+input[type="radio"] {
+  margin-right: 5px;
+}
+
+label {
+  font-size: 16px;
+}
+
+/* Add styles for buttons */
+button {
+  padding: 10px;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+/* Add styles for the selected text */
+#selectedText1, #selectedText2, #selectedText3, #selectedText4, #selectedText5, #selectedText6 {
+  font-size: 18px;
+}
+
+/* Add styles for the word lists */
+.word-list-container {
+  margin-top: 20px;
+}
+
+.word-list-container td {
+  font-size: 16px;
+}
+
+#numWordsLeft, #totalNumWords {
+  font-size: 16px;
+  margin-bottom: 10px;
+}
+
+/* Add styles for the reset button */
+#resetButton {
+  margin-top: 10px;
+}
+
+/* Add styles for the Firebase logo */
+.firebase-logo {
+  width: 80px;
+  height: auto;
+  margin-top: 10px;
+}
+/* Add this to your existing styles or adjust as needed */
+img {
+  max-width: 100%;
+  height: auto;
+  margin-bottom: 20px; /* Adjust margin as needed */
+}
+
   </style>
 </head>
 <body>
+<img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSI4DfXLHcE8_VPq3kZY8kVDU5xWJl0AsUAZQ&usqp=CAU" alt="Random Word Selector Image" style="max-width: 100%;">
 
 <h1>Random Word Selector</h1>
 

@@ -5,18 +5,34 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Random Word Selector</title>
   <style>
-   body {
+body {
   font-family: Arial, sans-serif;
   text-align: center;
   margin: 20px;
-  background-color: lightblue; /* Add this line to set the background color */
-
+  background-color: lightblue;
 }
 
 /* Add media query for smaller screens */
 @media only screen and (max-width: 600px) {
   body {
     margin: 10px;
+  }
+
+  /* Adjust layout for smaller screens */
+  .level-selector {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  label {
+    margin-bottom: 5px; /* Add space between radio button and text */
+    display: flex;
+    align-items: center; /* Align radio button and label vertically */
+  }
+
+  input[type="radio"] {
+    margin-right: 5px; /* Add space between radio button and label */
   }
 
   table {
@@ -125,7 +141,7 @@ img {
 <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSI4DfXLHcE8_VPq3kZY8kVDU5xWJl0AsUAZQ&usqp=CAU" alt="Random Word Selector Image" style="max-width: 100%;">
 
 <h1>Random Word Selector</h1>
-
+<div class="level-selector">
 <input type="radio" name="levelType" value="primary" id="primaryRadio" checked onclick="updateLevelType()">
   <label for="primaryRadio">Primary</label>
 <input type="radio" name="levelType" value="intermediate" id="intermediateRadio" onclick="updateLevelType()">
@@ -144,6 +160,7 @@ img {
 <input type="radio" name="level" value="extraWords" id="extraWordsRadio" onclick="updateLevel()"> 
   <label for="extraWordsRadio">Extra Words</label>
 <br><br>
+</div>
 <button onclick="generateRandomWord()">Select a Random Word</button>
 <br>
 <p id="randomWord" onclick="toggleDefinition()"></p>

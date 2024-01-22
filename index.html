@@ -167,8 +167,7 @@ img {
 <div id="definition" class="hidden">
   <h3>Definitions</h3>
   <table id="wordDefinitions"></table>
-  <h3>Examples</h3>
-  <table id="wordExamples"></table>
+
 </div>
 
 <h2>Word Lists</h2>
@@ -236,6 +235,8 @@ img {
 
 <p id="numWordsLeft">Words Left: 0</p><p id="totalNumWords">Total Words: 0</p>
 <br>
+
+
 <button onclick="resetUsedWords()">Reset Used Words</button>
 <script type="module">
   import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.4.0/firebase-app.js';
@@ -442,7 +443,6 @@ const usedWords = {
     intermediate: { level1: [], level2: [], level3: [], level4: [], level5: [], extraWords: [] } 
   };
 
-
 function generateRandomWord() {
     const currentWords = getWordsForLevel(selectedLevelType, selectedLevel);
 
@@ -467,7 +467,6 @@ function generateRandomWord() {
 
     // Simplified Firebase Realtime Database update
     set(ref(db, `${selectedLevelType}/${selectedLevel}/usedWords`), usedWords[selectedLevelType][selectedLevel].slice());
-
 
     document.getElementById("randomWord").innerHTML = `<h1>${randomWord}</h1>`;
 
@@ -541,6 +540,7 @@ function updateWordList() {
     }
 
     updateWordCount();
+
 }
 
 
@@ -627,20 +627,34 @@ updateSelectedText();
   function showDefinition() {
     const randomWord = document.getElementById("randomWord").textContent;
 
-    fetch(`https://wordsapiv1.p.rapidapi.com/words/${randomWord}`, {
-      method: "GET",
-      headers: {
-        "X-RapidAPI-Host": "wordsapiv1.p.rapidapi.com",
-        "X-RapidAPI-Key": "06f20456cfmsh1b8e00ea9fb360dp1243b0jsn77475ae1802e"
-     }
-    })
+fetch(`https://xf-english-dictionary1.p.rapidapi.com/v1/dictionary?selection=${randomWord}`, {
+  method: "POST",
+  headers: {
+    "content-type": "application/json",
+    "X-RapidAPI-Key": "06f20456cfmsh1b8e00ea9fb360dp1243b0jsn77475ae1802e",
+    "X-RapidAPI-Host": "xf-english-dictionary1.p.rapidapi.com"
+  },
+  body: JSON.stringify({
+    selection: randomWord
+  })
+})
     .then(response => response.json())
     .then(data => {
-      if (data && data.results && data.results.length > 0) {
-        const definitions = data.results.map(result => result.definition).filter(Boolean);
-        const examples = data.results.map(result => result.examples).flat().filter(Boolean);
+if (data && data.items && data.items.length > 0) {
+  const definitions = data.items.map(item => {
+    return {
+      word: item.word,
+      partOfSpeech: item.partOfSpeech,
+      definitions: item.definitions.map(definition => {
+        return {
+          definition: definition.definition,
+          examples: definition.examples || [] // Handle the case where examples may be undefined
+        };
+      })
+    };
+  });
 
-        showDefinitionAndExamples(definitions, examples);
+  showDefinitionAndExamples(definitions);
       } else {
         document.getElementById("definition").classList.remove("hidden");
         document.getElementById("wordDefinitions").innerHTML = "<tr><td>No definitions available.</td></tr>";
@@ -667,31 +681,53 @@ updateSelectedText();
     definitionDiv.classList.add("hidden");
   }
 
-  function showDefinitionAndExamples(definitions, examples) {
-    const wordDefinitionsContainer = document.getElementById("wordDefinitions");
-    const wordExamplesContainer = document.getElementById("wordExamples");
+function showDefinitionAndExamples(definitions) {
+  const wordDefinitionsContainer = document.getElementById("wordDefinitions");
 
-    wordDefinitionsContainer.innerHTML = "";
-    wordExamplesContainer.innerHTML = "";
+  wordDefinitionsContainer.innerHTML = "";
 
-    for (const definition of definitions) {
-      const tr = document.createElement("tr");
-      const td = document.createElement("td");
-      td.textContent = definition;
-      tr.appendChild(td);
-      wordDefinitionsContainer.appendChild(tr);
+  for (const item of definitions) {
+    console.log(`Word: ${item.word}`);
+
+    for (const definition of item.definitions) {
+      // Display the part of speech
+      const trPartOfSpeech = document.createElement("tr");
+      const tdPartOfSpeech = document.createElement("td");
+      tdPartOfSpeech.innerHTML = `<b>Part of Speech:</b> ${item.partOfSpeech}`;
+      trPartOfSpeech.appendChild(tdPartOfSpeech);
+      wordDefinitionsContainer.appendChild(trPartOfSpeech);
+
+      // Display the definition
+      const trDefinition = document.createElement("tr");
+      const tdDefinition = document.createElement("td");
+      tdDefinition.innerHTML = `<b>Definition:</b> ${definition.definition}`;
+      trDefinition.appendChild(tdDefinition);
+      wordDefinitionsContainer.appendChild(trDefinition);
+
+      // Display examples under the definition
+      for (const example of definition.examples.slice(0, 5)) {
+        const trExample = document.createElement("tr");
+        const tdExample = document.createElement("td");
+        tdExample.innerHTML = `<b>Example:</b> ${example}`;
+        trExample.appendChild(tdExample);
+        wordDefinitionsContainer.appendChild(trExample);
+      }
+
+      // Add a separator between definitions
+      const trSeparator = document.createElement("tr");
+      const tdSeparator = document.createElement("td");
+      tdSeparator.innerHTML = '<hr>';
+      trSeparator.appendChild(tdSeparator);
+      wordDefinitionsContainer.appendChild(trSeparator);
     }
-
-    for (const example of examples.slice(0, 5)) {
-      const tr = document.createElement("tr");
-      const td = document.createElement("td");
-      td.textContent = example;
-      tr.appendChild(td);
-      wordExamplesContainer.appendChild(tr);
-    }
-
-    document.getElementById("definition").classList.remove("hidden");
   }
+
+  document.getElementById("definition").classList.remove("hidden");
+}
+
+
+
+
 
   // Subscribe to changes in the Firebase database on page load
 // Subscribe to changes in the Firebase database on page load

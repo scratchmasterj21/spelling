@@ -1,0 +1,1499 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Manage Words - Spelling Bee</title>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Nunito', sans-serif;
+      min-height: 100vh;
+      background: linear-gradient(135deg, #1a2a1a 0%, #2d4a2d 50%, #3d5a3d 100%);
+      padding: 20px;
+      color: #fff;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: rgba(255,255,255,0.7);
+      text-decoration: none;
+      font-weight: 600;
+      margin-bottom: 20px;
+      transition: color 0.3s;
+    }
+
+    .back-link:hover {
+      color: #fff;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    .header h1 {
+      font-size: 2.5rem;
+      font-weight: 800;
+      margin-bottom: 5px;
+    }
+
+    .header p {
+      color: rgba(255,255,255,0.6);
+    }
+
+    /* Selectors */
+    .selectors-container {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 15px;
+      margin-bottom: 20px;
+    }
+
+    @media (max-width: 768px) {
+      .selectors-container {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .selector-box {
+      background: rgba(255,255,255,0.1);
+      backdrop-filter: blur(10px);
+      border-radius: 16px;
+      padding: 20px;
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .selector-label {
+      font-size: 0.85rem;
+      color: rgba(255,255,255,0.6);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 12px;
+      display: block;
+    }
+
+    .selector-dropdown {
+      width: 100%;
+      padding: 12px 16px;
+      background: rgba(255,255,255,0.15);
+      border: 1px solid rgba(255,255,255,0.2);
+      border-radius: 10px;
+      color: #fff;
+      font-family: inherit;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 12px center;
+      background-size: 18px;
+    }
+
+    .selector-dropdown option {
+      background: #2d4a2d;
+      color: #fff;
+    }
+
+    /* Current Selection Display */
+    .current-path {
+      background: rgba(46, 204, 113, 0.2);
+      border: 1px solid rgba(46, 204, 113, 0.4);
+      border-radius: 12px;
+      padding: 15px 20px;
+      margin-bottom: 20px;
+      text-align: center;
+    }
+
+    .current-path span {
+      font-weight: 700;
+      color: #2ecc71;
+    }
+
+    /* Action Buttons Row */
+    .actions-row {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+
+    .action-btn {
+      background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(255,255,255,0.2);
+      color: #fff;
+      padding: 12px 20px;
+      border-radius: 10px;
+      font-family: inherit;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .action-btn:hover {
+      background: rgba(255,255,255,0.2);
+    }
+
+    .action-btn.primary {
+      background: linear-gradient(135deg, #2ecc71, #27ae60);
+      border-color: transparent;
+    }
+
+    .action-btn.danger {
+      background: rgba(231, 76, 60, 0.2);
+      border-color: rgba(231, 76, 60, 0.5);
+      color: #e74c3c;
+    }
+
+    .action-btn.danger:hover {
+      background: rgba(231, 76, 60, 0.3);
+    }
+
+    /* Add Words Section */
+    .add-section {
+      background: rgba(255,255,255,0.1);
+      backdrop-filter: blur(10px);
+      border-radius: 16px;
+      padding: 20px;
+      margin-bottom: 20px;
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .add-section h3 {
+      margin-bottom: 15px;
+      color: #2ecc71;
+    }
+
+    .add-single-row {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 15px;
+    }
+
+    .add-input {
+      flex: 1;
+      padding: 12px 16px;
+      background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(255,255,255,0.2);
+      border-radius: 10px;
+      color: #fff;
+      font-family: inherit;
+      font-size: 1rem;
+    }
+
+    .add-input::placeholder {
+      color: rgba(255,255,255,0.4);
+    }
+
+    .add-input:focus {
+      outline: none;
+      border-color: #2ecc71;
+    }
+
+    .bulk-textarea {
+      width: 100%;
+      min-height: 120px;
+      padding: 16px;
+      background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(255,255,255,0.2);
+      border-radius: 10px;
+      color: #fff;
+      font-family: inherit;
+      font-size: 1rem;
+      resize: vertical;
+      margin-bottom: 10px;
+    }
+
+    .bulk-textarea::placeholder {
+      color: rgba(255,255,255,0.4);
+    }
+
+    .bulk-textarea:focus {
+      outline: none;
+      border-color: #2ecc71;
+    }
+
+    .bulk-hint {
+      font-size: 0.85rem;
+      color: rgba(255,255,255,0.5);
+      margin-bottom: 10px;
+    }
+
+    /* Word List Table */
+    .word-list-section {
+      background: rgba(255,255,255,0.1);
+      backdrop-filter: blur(10px);
+      border-radius: 16px;
+      padding: 20px;
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .word-list-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 15px;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .word-list-title {
+      font-size: 1.2rem;
+      font-weight: 700;
+    }
+
+    .word-count-badge {
+      background: rgba(46, 204, 113, 0.2);
+      border: 1px solid rgba(46, 204, 113, 0.4);
+      color: #2ecc71;
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      font-weight: 700;
+    }
+
+    .word-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .word-table th {
+      text-align: left;
+      padding: 12px;
+      background: rgba(0,0,0,0.2);
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+      font-weight: 700;
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .word-table td {
+      padding: 12px;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+    }
+
+    .word-table tbody tr:hover {
+      background: rgba(255,255,255,0.05);
+    }
+
+    .word-table input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+      cursor: pointer;
+    }
+
+    .word-text {
+      font-size: 1rem;
+    }
+
+    .word-text.editing {
+      background: rgba(255,255,255,0.1);
+      border: 1px solid #2ecc71;
+      padding: 6px 10px;
+      border-radius: 6px;
+      outline: none;
+      color: #fff;
+      font-family: inherit;
+      font-size: 1rem;
+      width: 100%;
+    }
+
+    .edit-btn, .save-btn, .cancel-btn {
+      background: transparent;
+      border: none;
+      color: rgba(255,255,255,0.6);
+      cursor: pointer;
+      padding: 6px 10px;
+      border-radius: 6px;
+      font-size: 0.9rem;
+      transition: all 0.3s;
+    }
+
+    .edit-btn:hover {
+      background: rgba(52, 152, 219, 0.2);
+      color: #3498db;
+    }
+
+    .save-btn {
+      color: #2ecc71;
+    }
+
+    .save-btn:hover {
+      background: rgba(46, 204, 113, 0.2);
+    }
+
+    .cancel-btn {
+      color: #e74c3c;
+    }
+
+    .cancel-btn:hover {
+      background: rgba(231, 76, 60, 0.2);
+    }
+
+    .no-words {
+      text-align: center;
+      padding: 40px;
+      color: rgba(255,255,255,0.5);
+    }
+
+    /* Modal */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0,0,0,0.7);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s;
+    }
+
+    .modal-overlay.visible {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .modal {
+      background: #2d4a2d;
+      border-radius: 20px;
+      padding: 30px;
+      max-width: 500px;
+      width: 90%;
+      transform: scale(0.9);
+      transition: transform 0.3s;
+    }
+
+    .modal-overlay.visible .modal {
+      transform: scale(1);
+    }
+
+    .modal h3 {
+      margin-bottom: 15px;
+    }
+
+    .modal p {
+      color: rgba(255,255,255,0.7);
+      margin-bottom: 20px;
+    }
+
+    .modal-actions {
+      display: flex;
+      gap: 10px;
+      justify-content: flex-end;
+    }
+
+    /* Toast */
+    .toast {
+      position: fixed;
+      bottom: 30px;
+      right: 30px;
+      background: #2ecc71;
+      color: #fff;
+      padding: 16px 24px;
+      border-radius: 12px;
+      font-weight: 600;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+      transform: translateY(100px);
+      opacity: 0;
+      transition: all 0.3s;
+      z-index: 1001;
+    }
+
+    .toast.visible {
+      transform: translateY(0);
+      opacity: 1;
+    }
+
+    .toast.error {
+      background: #e74c3c;
+    }
+
+    /* Select All */
+    .select-all-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 10px;
+      padding: 10px;
+      background: rgba(0,0,0,0.1);
+      border-radius: 8px;
+    }
+
+    .select-all-row label {
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    /* Search/Filter */
+    .search-box {
+      margin-bottom: 15px;
+    }
+
+    .search-input {
+      width: 100%;
+      padding: 12px 16px;
+      background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(255,255,255,0.2);
+      border-radius: 10px;
+      color: #fff;
+      font-family: inherit;
+      font-size: 1rem;
+    }
+
+    .search-input::placeholder {
+      color: rgba(255,255,255,0.4);
+    }
+
+    .search-input:focus {
+      outline: none;
+      border-color: #2ecc71;
+    }
+
+    /* Import/Export Section */
+    .import-export-section {
+      background: rgba(255,255,255,0.1);
+      backdrop-filter: blur(10px);
+      border-radius: 16px;
+      padding: 20px;
+      margin-bottom: 20px;
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .import-export-section h3 {
+      margin-bottom: 15px;
+      color: #3498db;
+    }
+
+    .import-export-row {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .file-input-wrapper {
+      position: relative;
+      overflow: hidden;
+      display: inline-block;
+    }
+
+    .file-input-wrapper input[type=file] {
+      position: absolute;
+      left: 0;
+      top: 0;
+      opacity: 0;
+      cursor: pointer;
+      width: 100%;
+      height: 100%;
+    }
+
+    /* Sync All Section */
+    .sync-all-section {
+      background: linear-gradient(135deg, rgba(155, 89, 182, 0.2), rgba(142, 68, 173, 0.2));
+      backdrop-filter: blur(10px);
+      border-radius: 16px;
+      padding: 20px;
+      margin-bottom: 20px;
+      border: 2px solid rgba(155, 89, 182, 0.4);
+    }
+
+    .sync-all-section h3 {
+      margin-bottom: 10px;
+      color: #9b59b6;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .sync-all-section p {
+      color: rgba(255,255,255,0.7);
+      font-size: 0.9rem;
+      margin-bottom: 15px;
+    }
+
+    .sync-toggle-row {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      margin-bottom: 15px;
+      padding: 15px;
+      background: rgba(0,0,0,0.2);
+      border-radius: 12px;
+    }
+
+    .sync-toggle {
+      position: relative;
+      width: 60px;
+      height: 32px;
+      background: rgba(255,255,255,0.2);
+      border-radius: 16px;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+
+    .sync-toggle.active {
+      background: #9b59b6;
+    }
+
+    .sync-toggle::after {
+      content: '';
+      position: absolute;
+      top: 4px;
+      left: 4px;
+      width: 24px;
+      height: 24px;
+      background: #fff;
+      border-radius: 50%;
+      transition: transform 0.3s;
+    }
+
+    .sync-toggle.active::after {
+      transform: translateX(28px);
+    }
+
+    .sync-toggle-label {
+      font-weight: 700;
+      font-size: 1rem;
+    }
+
+    .sync-badge {
+      background: #9b59b6;
+      color: white;
+      padding: 4px 10px;
+      border-radius: 12px;
+      font-size: 0.75rem;
+      font-weight: 700;
+    }
+
+    .sync-targets {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .sync-target-chip {
+      background: rgba(155, 89, 182, 0.3);
+      border: 1px solid rgba(155, 89, 182, 0.5);
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
+
+    .action-btn.sync {
+      background: linear-gradient(135deg, #9b59b6, #8e44ad);
+      border-color: transparent;
+    }
+
+    .action-btn.sync:hover {
+      box-shadow: 0 4px 15px rgba(155, 89, 182, 0.4);
+    }
+
+    /* Progress indicator */
+    .progress-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0,0,0,0.8);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 1002;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s;
+    }
+
+    .progress-overlay.visible {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .progress-spinner {
+      width: 60px;
+      height: 60px;
+      border: 4px solid rgba(255,255,255,0.2);
+      border-top-color: #9b59b6;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin-bottom: 20px;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .progress-text {
+      color: #fff;
+      font-size: 1.2rem;
+      font-weight: 600;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <a href="index.html" class="back-link">← Back to Home</a>
+
+    <header class="header">
+      <h1>✏️ Manage Words</h1>
+      <p>Add, edit, or delete words for each grade and level</p>
+    </header>
+
+    <!-- Selectors -->
+    <div class="selectors-container">
+      <div class="selector-box">
+        <span class="selector-label">Target</span>
+        <select class="selector-dropdown" id="gradeSelect">
+          <option value="G1">Grade 1</option>
+          <option value="G2">Grade 2</option>
+          <option value="G3">Grade 3</option>
+          <option value="G4">Grade 4</option>
+          <option value="G5">Grade 5</option>
+          <option value="G6">Grade 6</option>
+          <option value="competition">Competition</option>
+        </select>
+      </div>
+      <div class="selector-box">
+        <span class="selector-label">Level Type</span>
+        <select class="selector-dropdown" id="levelTypeSelect">
+          <option value="primary">Primary</option>
+          <option value="intermediate">Intermediate</option>
+        </select>
+      </div>
+      <div class="selector-box">
+        <span class="selector-label">Level</span>
+        <select class="selector-dropdown" id="levelSelect">
+          <option value="level1">Level 1</option>
+          <option value="level2">Level 2</option>
+          <option value="level3">Level 3</option>
+          <option value="level4">Level 4</option>
+          <option value="level5">Level 5</option>
+          <option value="extraWords">Extra Words</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Current Path Display -->
+    <div class="current-path">
+      📁 Firebase Path: <span id="currentPath">words/G1/primary/level1</span>
+    </div>
+
+    <!-- Add Words Section -->
+    <div class="add-section">
+      <h3>➕ Add Words</h3>
+      
+      <!-- Single Word Add -->
+      <div class="add-single-row">
+        <input type="text" class="add-input" id="singleWordInput" placeholder="Enter a single word...">
+        <button class="action-btn primary" onclick="addSingleWord()">Add Word</button>
+      </div>
+
+      <!-- Bulk Add -->
+      <textarea class="bulk-textarea" id="bulkWordsInput" placeholder="Paste multiple words here..."></textarea>
+      <p class="bulk-hint">Separate words by commas, spaces, or new lines. Duplicates will be ignored.</p>
+      <button class="action-btn primary" onclick="addBulkWords()">📦 Add All Words</button>
+    </div>
+
+    <!-- Import/Export Section -->
+    <div class="import-export-section">
+      <h3>📤 Import / Export</h3>
+      <div class="import-export-row">
+        <button class="action-btn" onclick="exportWords()">📥 Export as TXT</button>
+        <button class="action-btn" onclick="exportWordsCSV()">📥 Export as CSV</button>
+        <div class="file-input-wrapper">
+          <button class="action-btn">📤 Import from File</button>
+          <input type="file" id="importFileInput" accept=".txt,.csv" onchange="importWords(event)">
+        </div>
+        <button class="action-btn" onclick="copyWordsToClipboard()">📋 Copy to Clipboard</button>
+      </div>
+    </div>
+
+    <!-- Sync All Section -->
+    <div class="sync-all-section">
+      <h3>🔄 Sync to All Grades</h3>
+      <p>Enable this to add/import words to ALL grades (G1-G6) AND Competition at once. Perfect for initial setup!</p>
+      
+      <div class="sync-toggle-row">
+        <div class="sync-toggle" id="syncToggle" onclick="toggleSyncAll()"></div>
+        <span class="sync-toggle-label" id="syncToggleLabel">Sync to All: OFF</span>
+        <span class="sync-badge" id="syncBadge" style="display: none;">ACTIVE</span>
+      </div>
+
+      <div id="syncTargetsDisplay" style="display: none;">
+        <p style="margin-bottom: 8px; font-size: 0.85rem; color: rgba(255,255,255,0.6);">Words will be added to:</p>
+        <div class="sync-targets">
+          <span class="sync-target-chip">G1</span>
+          <span class="sync-target-chip">G2</span>
+          <span class="sync-target-chip">G3</span>
+          <span class="sync-target-chip">G4</span>
+          <span class="sync-target-chip">G5</span>
+          <span class="sync-target-chip">G6</span>
+          <span class="sync-target-chip">Competition</span>
+        </div>
+      </div>
+
+      <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid rgba(255,255,255,0.1);">
+        <p style="margin-bottom: 10px; font-size: 0.9rem;">Quick Actions (applies to selected Level Type + Level across all grades):</p>
+        <div class="import-export-row">
+          <button class="action-btn sync" onclick="syncCurrentWordsToAll()">📤 Copy Current Words to All</button>
+          <button class="action-btn sync" onclick="clearAllPaths()">🗑️ Clear All Paths</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Word List Section -->
+    <div class="word-list-section">
+      <div class="word-list-header">
+        <span class="word-list-title">📝 Word List</span>
+        <span class="word-count-badge" id="wordCountBadge">0 words</span>
+      </div>
+
+      <!-- Sync All Warning Banner -->
+      <div id="syncWarningBanner" style="display: none; background: linear-gradient(135deg, rgba(155, 89, 182, 0.3), rgba(142, 68, 173, 0.3)); border: 1px solid rgba(155, 89, 182, 0.5); border-radius: 10px; padding: 12px 16px; margin-bottom: 15px; text-align: center;">
+        <span style="font-weight: 700; color: #9b59b6;">🔄 SYNC ALL ACTIVE</span>
+        <span style="color: rgba(255,255,255,0.7); margin-left: 10px;">Edits & deletes will apply to G1-G6 + Competition</span>
+      </div>
+
+      <!-- Search -->
+      <div class="search-box">
+        <input type="text" class="search-input" id="searchInput" placeholder="🔍 Search words..." oninput="filterWords()">
+      </div>
+
+      <!-- Select All & Delete Selected -->
+      <div class="select-all-row">
+        <input type="checkbox" id="selectAllCheckbox" onchange="toggleSelectAll()">
+        <label for="selectAllCheckbox">Select All</label>
+        <button class="action-btn danger" onclick="deleteSelected()" style="margin-left: auto;">🗑️ Delete Selected</button>
+      </div>
+
+      <!-- Word Table -->
+      <table class="word-table">
+        <thead>
+          <tr>
+            <th style="width: 50px;"></th>
+            <th>Word</th>
+            <th style="width: 120px;">Actions</th>
+          </tr>
+        </thead>
+        <tbody id="wordTableBody">
+          <tr><td colspan="3" class="no-words">Loading...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Delete Confirmation Modal -->
+  <div class="modal-overlay" id="deleteModal">
+    <div class="modal">
+      <h3>⚠️ Confirm Delete</h3>
+      <p id="deleteModalText">Are you sure you want to delete the selected words?</p>
+      <div class="modal-actions">
+        <button class="action-btn" onclick="closeDeleteModal()">Cancel</button>
+        <button class="action-btn danger" onclick="confirmDelete()">Delete</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div class="toast" id="toast"></div>
+
+  <!-- Progress Overlay -->
+  <div class="progress-overlay" id="progressOverlay">
+    <div class="progress-spinner"></div>
+    <div class="progress-text" id="progressText">Syncing to all grades...</div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.4.0/firebase-app.js';
+    import { getDatabase, ref, set, get, onValue } from 'https://www.gstatic.com/firebasejs/9.4.0/firebase-database.js';
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyAjBQR3CIyFe2B3X764vUAlgZBBv6MXWxU",
+      authDomain: "spelling-f0a67.firebaseapp.com",
+      databaseURL: "https://spelling-f0a67-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "spelling-f0a67",
+      storageBucket: "spelling-f0a67.appspot.com",
+      messagingSenderId: "417568436363",
+      appId: "1:417568436363:web:f2815fd681ccfaf640a48e",
+      measurementId: "G-82924CD1JX"
+    };
+
+    const firebaseApp = initializeApp(firebaseConfig);
+    const db = getDatabase(firebaseApp);
+
+    // State
+    let currentWords = [];
+    let filteredWords = [];
+    let selectedWords = new Set();
+    let wordsToDelete = [];
+    let editingWord = null;
+    let syncAllEnabled = false;
+
+    // All target paths
+    const ALL_GRADES = ['G1', 'G2', 'G3', 'G4', 'G5', 'G6', 'competition'];
+
+    // Expose functions to window
+    window.addSingleWord = addSingleWord;
+    window.addBulkWords = addBulkWords;
+    window.deleteSelected = deleteSelected;
+    window.toggleSelectAll = toggleSelectAll;
+    window.filterWords = filterWords;
+    window.closeDeleteModal = closeDeleteModal;
+    window.confirmDelete = confirmDelete;
+    window.exportWords = exportWords;
+    window.exportWordsCSV = exportWordsCSV;
+    window.importWords = importWords;
+    window.copyWordsToClipboard = copyWordsToClipboard;
+    window.startEdit = startEdit;
+    window.saveEdit = saveEdit;
+    window.cancelEdit = cancelEdit;
+    window.toggleWordSelection = toggleWordSelection;
+    window.toggleSyncAll = toggleSyncAll;
+    window.syncCurrentWordsToAll = syncCurrentWordsToAll;
+    window.clearAllPaths = clearAllPaths;
+
+    // Initialize
+    document.addEventListener('DOMContentLoaded', () => {
+      document.getElementById('gradeSelect').addEventListener('change', loadWords);
+      document.getElementById('levelTypeSelect').addEventListener('change', loadWords);
+      document.getElementById('levelSelect').addEventListener('change', loadWords);
+
+      // Enter key for single word input
+      document.getElementById('singleWordInput').addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') addSingleWord();
+      });
+
+      loadWords();
+    });
+
+    function getBasePath() {
+      const grade = document.getElementById('gradeSelect').value;
+      const levelType = document.getElementById('levelTypeSelect').value;
+      const level = document.getElementById('levelSelect').value;
+      return `${grade}/${levelType}/${level}`;
+    }
+
+    function updatePathDisplay() {
+      const path = `words/${getBasePath()}`;
+      document.getElementById('currentPath').textContent = path;
+    }
+
+    async function loadWords() {
+      updatePathDisplay();
+      selectedWords.clear();
+      document.getElementById('selectAllCheckbox').checked = false;
+
+      const basePath = getBasePath();
+      const wordsRef = ref(db, `words/${basePath}`);
+
+      try {
+        const snapshot = await get(wordsRef);
+        currentWords = snapshot.val() || [];
+        filteredWords = [...currentWords];
+        renderWordTable();
+      } catch (error) {
+        console.error('Error loading words:', error);
+        showToast('Error loading words', true);
+        currentWords = [];
+        filteredWords = [];
+        renderWordTable();
+      }
+    }
+
+    function renderWordTable() {
+      const tbody = document.getElementById('wordTableBody');
+      const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+
+      // Filter words
+      filteredWords = currentWords.filter(word => 
+        word.toLowerCase().includes(searchTerm)
+      ).sort();
+
+      // Update count badge
+      document.getElementById('wordCountBadge').textContent = 
+        `${filteredWords.length} word${filteredWords.length !== 1 ? 's' : ''}`;
+
+      if (filteredWords.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="3" class="no-words">No words found. Add some words above!</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = filteredWords.map(word => {
+        const isSelected = selectedWords.has(word);
+        const isEditing = editingWord === word;
+
+        return `
+          <tr>
+            <td>
+              <input type="checkbox" 
+                ${isSelected ? 'checked' : ''} 
+                onchange="toggleWordSelection('${escapeHtml(word)}')"
+              >
+            </td>
+            <td>
+              ${isEditing 
+                ? `<input type="text" class="word-text editing" id="editInput" value="${escapeHtml(word)}" onkeypress="if(event.key==='Enter')saveEdit('${escapeHtml(word)}')">`
+                : `<span class="word-text">${escapeHtml(word)}</span>`
+              }
+            </td>
+            <td>
+              ${isEditing 
+                ? `<button class="save-btn" onclick="saveEdit('${escapeHtml(word)}')">Save</button>
+                   <button class="cancel-btn" onclick="cancelEdit()">Cancel</button>`
+                : `<button class="edit-btn" onclick="startEdit('${escapeHtml(word)}')">✏️ Edit</button>`
+              }
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML.replace(/'/g, "\\'");
+    }
+
+    function toggleWordSelection(word) {
+      if (selectedWords.has(word)) {
+        selectedWords.delete(word);
+      } else {
+        selectedWords.add(word);
+      }
+      updateSelectAllState();
+    }
+
+    function toggleSelectAll() {
+      const checkbox = document.getElementById('selectAllCheckbox');
+      if (checkbox.checked) {
+        filteredWords.forEach(word => selectedWords.add(word));
+      } else {
+        filteredWords.forEach(word => selectedWords.delete(word));
+      }
+      renderWordTable();
+    }
+
+    function updateSelectAllState() {
+      const checkbox = document.getElementById('selectAllCheckbox');
+      const allSelected = filteredWords.length > 0 && 
+        filteredWords.every(word => selectedWords.has(word));
+      checkbox.checked = allSelected;
+    }
+
+    function filterWords() {
+      renderWordTable();
+    }
+
+    // Add Single Word
+    async function addSingleWord() {
+      const input = document.getElementById('singleWordInput');
+      const word = input.value.trim();
+
+      if (!word) {
+        showToast('Please enter a word', true);
+        return;
+      }
+
+      if (syncAllEnabled) {
+        // Add to all paths
+        await saveWordsToAllPaths([word]);
+        input.value = '';
+        showToast(`Added "${word}" to all grades!`);
+        loadWords(); // Refresh current view
+      } else {
+        if (currentWords.includes(word)) {
+          showToast('Word already exists', true);
+          return;
+        }
+        const newWords = [...currentWords, word];
+        await saveWords(newWords);
+        input.value = '';
+        showToast(`Added: ${word}`);
+      }
+    }
+
+    // Add Bulk Words
+    async function addBulkWords() {
+      const textarea = document.getElementById('bulkWordsInput');
+      const text = textarea.value.trim();
+
+      if (!text) {
+        showToast('Please enter some words', true);
+        return;
+      }
+
+      // Parse words - split by commas, newlines, or multiple spaces
+      const words = text
+        .split(/[,\n\r]+/)
+        .map(w => w.trim())
+        .filter(w => w.length > 0);
+
+      // Remove duplicates from input
+      const uniqueWords = [...new Set(words)];
+
+      if (uniqueWords.length === 0) {
+        showToast('No valid words found', true);
+        return;
+      }
+
+      if (syncAllEnabled) {
+        // Add to all paths
+        await saveWordsToAllPaths(uniqueWords);
+        textarea.value = '';
+        showToast(`Added ${uniqueWords.length} word${uniqueWords.length !== 1 ? 's' : ''} to all grades!`);
+        loadWords(); // Refresh current view
+      } else {
+        const newWords = uniqueWords.filter(w => !currentWords.includes(w));
+        if (newWords.length === 0) {
+          showToast('No new words to add (all duplicates)', true);
+          return;
+        }
+        const allWords = [...currentWords, ...newWords];
+        await saveWords(allWords);
+        textarea.value = '';
+        showToast(`Added ${newWords.length} word${newWords.length !== 1 ? 's' : ''}`);
+      }
+    }
+
+    // Delete Selected Words
+    function deleteSelected() {
+      if (selectedWords.size === 0) {
+        showToast('No words selected', true);
+        return;
+      }
+
+      wordsToDelete = Array.from(selectedWords);
+      
+      if (syncAllEnabled) {
+        document.getElementById('deleteModalText').textContent = 
+          `⚠️ SYNC ALL is ON!\n\nThis will delete ${wordsToDelete.length} word${wordsToDelete.length !== 1 ? 's' : ''} from ALL grades (G1-G6 + Competition).\n\nAre you sure?`;
+      } else {
+        document.getElementById('deleteModalText').textContent = 
+          `Are you sure you want to delete ${wordsToDelete.length} word${wordsToDelete.length !== 1 ? 's' : ''}?`;
+      }
+      document.getElementById('deleteModal').classList.add('visible');
+    }
+
+    function closeDeleteModal() {
+      document.getElementById('deleteModal').classList.remove('visible');
+      wordsToDelete = [];
+    }
+
+    async function confirmDelete() {
+      if (syncAllEnabled) {
+        // Delete from all paths
+        await deleteWordsFromAllPaths(wordsToDelete);
+        selectedWords.clear();
+        closeDeleteModal();
+        showToast(`Deleted ${wordsToDelete.length} word${wordsToDelete.length !== 1 ? 's' : ''} from all grades!`);
+        loadWords(); // Refresh
+      } else {
+        const newWords = currentWords.filter(word => !wordsToDelete.includes(word));
+        await saveWords(newWords);
+        selectedWords.clear();
+        closeDeleteModal();
+        showToast(`Deleted ${wordsToDelete.length} word${wordsToDelete.length !== 1 ? 's' : ''}`);
+      }
+    }
+
+    // Delete words from all paths
+    async function deleteWordsFromAllPaths(wordsToRemove) {
+      const paths = getAllPaths();
+      showProgress('Deleting from all grades...');
+
+      try {
+        for (let i = 0; i < paths.length; i++) {
+          const path = paths[i];
+          updateProgress(`Deleting from ${path.split('/')[0]}... (${i + 1}/${paths.length})`);
+          
+          const wordsRef = ref(db, `words/${path}`);
+          const snapshot = await get(wordsRef);
+          const existingWords = snapshot.val() || [];
+          const filteredWords = existingWords.filter(w => !wordsToRemove.includes(w));
+          
+          await set(wordsRef, filteredWords);
+        }
+        hideProgress();
+      } catch (error) {
+        console.error('Error deleting from all paths:', error);
+        hideProgress();
+        showToast('Error deleting from some paths', true);
+      }
+    }
+
+    // Edit Word
+    function startEdit(word) {
+      editingWord = word;
+      renderWordTable();
+      setTimeout(() => {
+        const input = document.getElementById('editInput');
+        if (input) {
+          input.focus();
+          input.select();
+        }
+      }, 0);
+    }
+
+    async function saveEdit(oldWord) {
+      const input = document.getElementById('editInput');
+      const newWord = input.value.trim();
+
+      if (!newWord) {
+        showToast('Word cannot be empty', true);
+        return;
+      }
+
+      if (newWord !== oldWord && currentWords.includes(newWord)) {
+        showToast('Word already exists in current list', true);
+        return;
+      }
+
+      editingWord = null;
+
+      if (syncAllEnabled) {
+        // Edit in all paths
+        await editWordInAllPaths(oldWord, newWord);
+        showToast(`Updated "${oldWord}" → "${newWord}" in all grades!`);
+        loadWords(); // Refresh
+      } else {
+        const newWords = currentWords.map(w => w === oldWord ? newWord : w);
+        await saveWords(newWords);
+        showToast(`Updated: ${oldWord} → ${newWord}`);
+      }
+    }
+
+    // Edit word in all paths
+    async function editWordInAllPaths(oldWord, newWord) {
+      const paths = getAllPaths();
+      showProgress('Updating in all grades...');
+
+      try {
+        for (let i = 0; i < paths.length; i++) {
+          const path = paths[i];
+          updateProgress(`Updating in ${path.split('/')[0]}... (${i + 1}/${paths.length})`);
+          
+          const wordsRef = ref(db, `words/${path}`);
+          const snapshot = await get(wordsRef);
+          const existingWords = snapshot.val() || [];
+          
+          // Replace old word with new word if it exists
+          const updatedWords = existingWords.map(w => w === oldWord ? newWord : w);
+          
+          // Remove duplicates (in case new word already existed)
+          const uniqueWords = [...new Set(updatedWords)];
+          
+          await set(wordsRef, uniqueWords);
+        }
+        hideProgress();
+      } catch (error) {
+        console.error('Error editing in all paths:', error);
+        hideProgress();
+        showToast('Error updating some paths', true);
+      }
+    }
+
+    function cancelEdit() {
+      editingWord = null;
+      renderWordTable();
+    }
+
+    // Save Words to Firebase
+    async function saveWords(words) {
+      const basePath = getBasePath();
+      const wordsRef = ref(db, `words/${basePath}`);
+
+      try {
+        await set(wordsRef, words);
+        currentWords = words;
+        filteredWords = [...words];
+        renderWordTable();
+      } catch (error) {
+        console.error('Error saving words:', error);
+        showToast('Error saving words', true);
+      }
+    }
+
+    // Export Words as TXT
+    function exportWords() {
+      if (currentWords.length === 0) {
+        showToast('No words to export', true);
+        return;
+      }
+
+      const content = currentWords.sort().join('\n');
+      const blob = new Blob([content], { type: 'text/plain' });
+      const url = URL.createObjectURL(blob);
+      
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `words_${getBasePath().replace(/\//g, '_')}.txt`;
+      a.click();
+      
+      URL.revokeObjectURL(url);
+      showToast('Exported as TXT');
+    }
+
+    // Export Words as CSV
+    function exportWordsCSV() {
+      if (currentWords.length === 0) {
+        showToast('No words to export', true);
+        return;
+      }
+
+      const content = 'word\n' + currentWords.sort().join('\n');
+      const blob = new Blob([content], { type: 'text/csv' });
+      const url = URL.createObjectURL(blob);
+      
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `words_${getBasePath().replace(/\//g, '_')}.csv`;
+      a.click();
+      
+      URL.revokeObjectURL(url);
+      showToast('Exported as CSV');
+    }
+
+    // Import Words
+    async function importWords(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = async (e) => {
+        const text = e.target.result;
+        const words = text
+          .split(/[,\n\r]+/)
+          .map(w => w.trim())
+          .filter(w => w.length > 0 && w.toLowerCase() !== 'word'); // Filter header
+
+        const uniqueWords = [...new Set(words)];
+
+        if (uniqueWords.length === 0) {
+          showToast('No words found in file', true);
+          return;
+        }
+
+        if (syncAllEnabled) {
+          // Import to all paths
+          await saveWordsToAllPaths(uniqueWords);
+          showToast(`Imported ${uniqueWords.length} word${uniqueWords.length !== 1 ? 's' : ''} to all grades!`);
+          loadWords(); // Refresh current view
+        } else {
+          const newWords = uniqueWords.filter(w => !currentWords.includes(w));
+
+          if (newWords.length === 0) {
+            showToast('No new words found in file', true);
+            return;
+          }
+
+          const allWords = [...currentWords, ...newWords];
+          await saveWords(allWords);
+          showToast(`Imported ${newWords.length} new word${newWords.length !== 1 ? 's' : ''}`);
+        }
+      };
+
+      reader.readAsText(file);
+      event.target.value = ''; // Reset input
+    }
+
+    // Copy to Clipboard
+    async function copyWordsToClipboard() {
+      if (currentWords.length === 0) {
+        showToast('No words to copy', true);
+        return;
+      }
+
+      const text = currentWords.sort().join(', ');
+      await navigator.clipboard.writeText(text);
+      showToast('Words copied to clipboard');
+    }
+
+    // Toggle Sync All
+    function toggleSyncAll() {
+      syncAllEnabled = !syncAllEnabled;
+      const toggle = document.getElementById('syncToggle');
+      const label = document.getElementById('syncToggleLabel');
+      const badge = document.getElementById('syncBadge');
+      const targets = document.getElementById('syncTargetsDisplay');
+      const warningBanner = document.getElementById('syncWarningBanner');
+
+      if (syncAllEnabled) {
+        toggle.classList.add('active');
+        label.textContent = 'Sync to All: ON';
+        badge.style.display = 'inline';
+        targets.style.display = 'block';
+        warningBanner.style.display = 'block';
+      } else {
+        toggle.classList.remove('active');
+        label.textContent = 'Sync to All: OFF';
+        badge.style.display = 'none';
+        targets.style.display = 'none';
+        warningBanner.style.display = 'none';
+      }
+    }
+
+    // Get all paths for current level type and level
+    function getAllPaths() {
+      const levelType = document.getElementById('levelTypeSelect').value;
+      const level = document.getElementById('levelSelect').value;
+      return ALL_GRADES.map(grade => `${grade}/${levelType}/${level}`);
+    }
+
+    // Save words to multiple paths
+    async function saveWordsToAllPaths(words) {
+      const paths = getAllPaths();
+      showProgress('Syncing to all grades...');
+
+      try {
+        const promises = paths.map(async (path, index) => {
+          updateProgress(`Saving to ${path.split('/')[0]}... (${index + 1}/${paths.length})`);
+          const wordsRef = ref(db, `words/${path}`);
+          
+          // Get existing words and merge
+          const snapshot = await get(wordsRef);
+          const existingWords = snapshot.val() || [];
+          const mergedWords = [...new Set([...existingWords, ...words])];
+          
+          await set(wordsRef, mergedWords);
+        });
+
+        await Promise.all(promises);
+        hideProgress();
+        return true;
+      } catch (error) {
+        console.error('Error saving to all paths:', error);
+        hideProgress();
+        showToast('Error syncing to some paths', true);
+        return false;
+      }
+    }
+
+    // Sync current words to all paths
+    async function syncCurrentWordsToAll() {
+      if (currentWords.length === 0) {
+        showToast('No words to sync. Add words first!', true);
+        return;
+      }
+
+      const levelType = document.getElementById('levelTypeSelect').value;
+      const level = document.getElementById('levelSelect').value;
+      const levelLabel = level === 'extraWords' ? 'Extra Words' : level.replace('level', 'Level ');
+
+      if (!confirm(`This will copy all ${currentWords.length} words from the current selection to ALL grades (G1-G6 + Competition) for ${levelType} ${levelLabel}.\n\nExisting words in each path will be preserved (merged).\n\nContinue?`)) {
+        return;
+      }
+
+      showProgress('Copying words to all grades...');
+      const paths = getAllPaths();
+
+      try {
+        for (let i = 0; i < paths.length; i++) {
+          const path = paths[i];
+          updateProgress(`Saving to ${path.split('/')[0]}... (${i + 1}/${paths.length})`);
+          
+          const wordsRef = ref(db, `words/${path}`);
+          const snapshot = await get(wordsRef);
+          const existingWords = snapshot.val() || [];
+          const mergedWords = [...new Set([...existingWords, ...currentWords])];
+          
+          await set(wordsRef, mergedWords);
+        }
+
+        hideProgress();
+        showToast(`Synced ${currentWords.length} words to all ${paths.length} paths!`);
+      } catch (error) {
+        console.error('Error syncing:', error);
+        hideProgress();
+        showToast('Error syncing words', true);
+      }
+    }
+
+    // Clear all paths
+    async function clearAllPaths() {
+      const levelType = document.getElementById('levelTypeSelect').value;
+      const level = document.getElementById('levelSelect').value;
+      const levelLabel = level === 'extraWords' ? 'Extra Words' : level.replace('level', 'Level ');
+
+      if (!confirm(`⚠️ WARNING: This will DELETE all words from ALL grades (G1-G6 + Competition) for ${levelType} ${levelLabel}.\n\nThis action cannot be undone!\n\nAre you sure?`)) {
+        return;
+      }
+
+      if (!confirm(`Really delete ALL words from ${levelType} ${levelLabel} across ALL grades?\n\nType thinking... Last chance!`)) {
+        return;
+      }
+
+      showProgress('Clearing all paths...');
+      const paths = getAllPaths();
+
+      try {
+        for (let i = 0; i < paths.length; i++) {
+          const path = paths[i];
+          updateProgress(`Clearing ${path.split('/')[0]}... (${i + 1}/${paths.length})`);
+          await set(ref(db, `words/${path}`), []);
+        }
+
+        hideProgress();
+        showToast(`Cleared all ${paths.length} paths`);
+        loadWords(); // Refresh
+      } catch (error) {
+        console.error('Error clearing:', error);
+        hideProgress();
+        showToast('Error clearing paths', true);
+      }
+    }
+
+    // Progress helpers
+    function showProgress(text) {
+      document.getElementById('progressText').textContent = text;
+      document.getElementById('progressOverlay').classList.add('visible');
+    }
+
+    function updateProgress(text) {
+      document.getElementById('progressText').textContent = text;
+    }
+
+    function hideProgress() {
+      document.getElementById('progressOverlay').classList.remove('visible');
+    }
+
+    // Toast Notification
+    function showToast(message, isError = false) {
+      const toast = document.getElementById('toast');
+      toast.textContent = message;
+      toast.className = 'toast visible' + (isError ? ' error' : '');
+      
+      setTimeout(() => {
+        toast.classList.remove('visible');
+      }, 3000);
+    }
+  </script>
+</body>
+</html>
+

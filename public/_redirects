@@ -1,0 +1,5 @@
+# Clean URLs - access pages without .html extension
+/practice    /practice.html    200
+/competition /competition.html 200
+/manage      /manage.html      200
+

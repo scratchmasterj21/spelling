@@ -1,0 +1,4 @@
+# Cloudflare Pages configuration
+name = "spelling"
+pages_build_output_dir = "public"
+

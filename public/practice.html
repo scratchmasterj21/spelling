@@ -364,6 +364,29 @@
       text-decoration: line-through;
     }
 
+    .word-item.never-selected {
+      border: 2px solid rgba(52, 152, 219, 0.5);
+      animation: pulse-border 2s infinite;
+    }
+
+    @keyframes pulse-border {
+      0%, 100% { border-color: rgba(52, 152, 219, 0.5); }
+      50% { border-color: rgba(52, 152, 219, 0.8); }
+    }
+
+    .selection-count {
+      display: inline-block;
+      background: rgba(52, 152, 219, 0.8);
+      color: white;
+      font-size: 0.7rem;
+      font-weight: 700;
+      padding: 2px 6px;
+      border-radius: 10px;
+      margin-left: 6px;
+      min-width: 18px;
+      text-align: center;
+    }
+
     /* Definition Section */
     .definition-section {
       background: var(--card-bg);
@@ -480,6 +503,10 @@
         <div class="count-value" id="totalWords">0</div>
         <div class="count-label">Total Words</div>
       </div>
+      <div class="count-item">
+        <div class="count-value" id="totalSelections">0</div>
+        <div class="count-label">Total Selections</div>
+      </div>
     </div>
 
     <!-- Definition Section -->
@@ -524,7 +551,21 @@
     let selectedLevel = 'level1';
     let currentWords = [];
     let usedWords = [];
+    let selectionCounts = {}; // Track how many times each word has been selected
     let unsubscribe = null;
+
+    // Enhanced random number generator using Crypto API
+    function getSecureRandomIndex(max) {
+      if (max === 0) return 0;
+      // Use crypto API for better randomness (fallback to Math.random for very old browsers)
+      if (window.crypto && window.crypto.getRandomValues) {
+        const array = new Uint32Array(1);
+        crypto.getRandomValues(array);
+        return array[0] % max;
+      }
+      // Fallback for very old browsers
+      return Math.floor(Math.random() * max);
+    }
 
     // Expose functions to window
     window.generateRandomWord = generateRandomWord;
@@ -571,6 +612,17 @@
       loadWords();
     });
 
+    function setLevelType(type) {
+      selectedLevelType = type;
+      const levelTypeButtons = document.querySelectorAll('#levelTypeButtons .pill-btn');
+      levelTypeButtons.forEach(b => {
+        b.classList.remove('active');
+        if (b.dataset.type === type) {
+          b.classList.add('active');
+        }
+      });
+    }
+
     function setupGradeButtons() {
       const buttons = document.querySelectorAll('#gradeButtons .grade-btn');
       buttons.forEach(btn => {
@@ -578,6 +630,16 @@
           buttons.forEach(b => b.classList.remove('active'));
           btn.classList.add('active');
           selectedGrade = btn.dataset.grade;
+          
+          // Auto-select level type based on grade
+          // G1, G2, G3 -> Primary
+          // G4, G5, G6 -> Intermediate
+          if (selectedGrade === 'G1' || selectedGrade === 'G2' || selectedGrade === 'G3') {
+            setLevelType('primary');
+          } else if (selectedGrade === 'G4' || selectedGrade === 'G5' || selectedGrade === 'G6') {
+            setLevelType('intermediate');
+          }
+          
           loadWords();
         });
       });
@@ -631,6 +693,13 @@
         // Subscribe to used words changes
         unsubscribe = onValue(usedWordsRef, (snapshot) => {
           usedWords = snapshot.val() || [];
+          
+          // Update selection counts
+          selectionCounts = {};
+          usedWords.forEach(word => {
+            selectionCounts[word] = (selectionCounts[word] || 0) + 1;
+          });
+          
           updateWordGrid();
           updateWordCount();
           
@@ -666,7 +735,10 @@
       const sortedWords = [...currentWords].sort();
       grid.innerHTML = sortedWords.map(word => {
         const isUsed = usedWords.includes(word);
-        return `<div class="word-item ${isUsed ? 'used' : ''}">${word}</div>`;
+        const count = selectionCounts[word] || 0;
+        const countBadge = count > 0 ? `<span class="selection-count">${count}</span>` : '';
+        const neverSelected = !isUsed ? 'never-selected' : '';
+        return `<div class="word-item ${isUsed ? 'used' : ''} ${neverSelected}" title="${count > 0 ? `Selected ${count} time${count !== 1 ? 's' : ''}` : 'Never selected'}">${word}${countBadge}</div>`;
       }).join('');
     }
 
@@ -674,6 +746,7 @@
       const left = currentWords.length - usedWords.length;
       document.getElementById('wordsLeft').textContent = Math.max(0, left);
       document.getElementById('totalWords').textContent = currentWords.length;
+      document.getElementById('totalSelections').textContent = usedWords.length;
     }
 
     async function generateRandomWord() {
@@ -689,7 +762,8 @@
         return;
       }
 
-      const randomIndex = Math.floor(Math.random() * remainingWords.length);
+      // Use secure random number generator (Crypto API)
+      const randomIndex = getSecureRandomIndex(remainingWords.length);
       const randomWord = remainingWords[randomIndex];
 
       // Add to used words

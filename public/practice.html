@@ -482,6 +482,8 @@
           <button class="pill-btn level" data-level="level4">Level 4</button>
           <button class="pill-btn level" data-level="level5">Level 5</button>
           <button class="pill-btn level" data-level="extraWords">Extra</button>
+          <button class="pill-btn level" data-level="extraWords2">Extra 2</button>
+          <button class="pill-btn level" data-level="extraWords3">Extra 3</button>
         </div>
       </div>
     </div>
@@ -719,7 +721,16 @@
 
     function updateSelectionDisplay() {
       const levelTypeLabel = selectedLevelType.charAt(0).toUpperCase() + selectedLevelType.slice(1);
-      const levelLabel = selectedLevel === 'extraWords' ? 'Extra Words' : selectedLevel.replace('level', 'Level ');
+      let levelLabel;
+      if (selectedLevel === 'extraWords') {
+        levelLabel = 'Extra Words';
+      } else if (selectedLevel === 'extraWords2') {
+        levelLabel = 'Extra Words 2';
+      } else if (selectedLevel === 'extraWords3') {
+        levelLabel = 'Extra Words 3';
+      } else {
+        levelLabel = selectedLevel.replace('level', 'Level ');
+      }
       document.getElementById('currentSelection').textContent = `${selectedGrade} • ${levelTypeLabel} • ${levelLabel}`;
       document.getElementById('wordListTitle').textContent = `${selectedGrade} ${levelTypeLabel} ${levelLabel}`;
     }

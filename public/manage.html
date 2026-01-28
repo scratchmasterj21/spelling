@@ -770,6 +770,8 @@
           <option value="level4">Level 4</option>
           <option value="level5">Level 5</option>
           <option value="extraWords">Extra Words</option>
+          <option value="extraWords2">Extra Words 2</option>
+          <option value="extraWords3">Extra Words 3</option>
         </select>
       </div>
     </div>
@@ -1511,7 +1513,16 @@
 
       const levelType = document.getElementById('levelTypeSelect').value;
       const level = document.getElementById('levelSelect').value;
-      const levelLabel = level === 'extraWords' ? 'Extra Words' : level.replace('level', 'Level ');
+      let levelLabel;
+      if (level === 'extraWords') {
+        levelLabel = 'Extra Words';
+      } else if (level === 'extraWords2') {
+        levelLabel = 'Extra Words 2';
+      } else if (level === 'extraWords3') {
+        levelLabel = 'Extra Words 3';
+      } else {
+        levelLabel = level.replace('level', 'Level ');
+      }
 
       if (!confirm(`This will copy all ${currentWords.length} words from the current selection to ALL grades (G1-G6 + Competition) for ${levelType} ${levelLabel}.\n\nExisting words in each path will be preserved (merged).\n\nContinue?`)) {
         return;
@@ -1546,7 +1557,16 @@
     async function clearAllPaths() {
       const levelType = document.getElementById('levelTypeSelect').value;
       const level = document.getElementById('levelSelect').value;
-      const levelLabel = level === 'extraWords' ? 'Extra Words' : level.replace('level', 'Level ');
+      let levelLabel;
+      if (level === 'extraWords') {
+        levelLabel = 'Extra Words';
+      } else if (level === 'extraWords2') {
+        levelLabel = 'Extra Words 2';
+      } else if (level === 'extraWords3') {
+        levelLabel = 'Extra Words 3';
+      } else {
+        levelLabel = level.replace('level', 'Level ');
+      }
 
       if (!confirm(`⚠️ WARNING: This will DELETE all words from ALL grades (G1-G6 + Competition) for ${levelType} ${levelLabel}.\n\nThis action cannot be undone!\n\nAre you sure?`)) {
         return;

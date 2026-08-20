@@ -186,6 +186,21 @@
       color: #2ecc71;
     }
 
+    .overview-section {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+
+    .overview-header { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-bottom: 12px; }
+    .overview-scroll { overflow-x: auto; }
+    .overview-table { width: 100%; border-collapse: collapse; min-width: 1120px; }
+    .overview-table th, .overview-table td { padding: 8px 10px; text-align: center; border-bottom: 1px solid var(--card-border); white-space: nowrap; }
+    .overview-table th:first-child, .overview-table td:first-child { text-align: left; position: sticky; left: 0; background: var(--bg-secondary); font-weight: 700; }
+    .overview-table .empty-count { color: #e74c3c; font-weight: 800; }
+
     /* Action Buttons Row */
     .actions-row {
       display: flex;
@@ -740,6 +755,19 @@
       <p>Add, edit, or delete words for each grade and level</p>
     </header>
 
+    <section class="overview-section">
+      <div class="overview-header">
+        <div>
+          <h3>📊 Word-Bank Overview</h3>
+          <p class="bulk-hint">Counts for every target and level. Red zeroes identify empty lists.</p>
+        </div>
+        <button class="action-btn" onclick="loadWordBankOverview()">↻ Refresh</button>
+      </div>
+      <div class="overview-scroll" id="overviewContent">
+        <div class="no-words">Loading overview...</div>
+      </div>
+    </section>
+
     <!-- Selectors -->
     <div class="selectors-container">
       <div class="selector-box">
@@ -808,7 +836,13 @@
           <input type="file" id="importFileInput" accept=".txt,.csv" onchange="importWords(event)">
         </div>
         <button class="action-btn" onclick="copyWordsToClipboard()">📋 Copy to Clipboard</button>
+        <button class="action-btn" onclick="backupAllWords()">💾 Backup All (JSON)</button>
+        <div class="file-input-wrapper">
+          <button class="action-btn">♻️ Restore Backup</button>
+          <input type="file" id="restoreFileInput" accept=".json,application/json" onchange="restoreAllWords(event)">
+        </div>
       </div>
+      <p class="bulk-hint">JSON backup and restore cover every grade, competition list, level type, and level.</p>
     </div>
 
     <!-- Sync All Section -->
@@ -931,6 +965,7 @@
     let wordsToDelete = [];
     let editingWord = null;
     let syncAllEnabled = false;
+    let loadRequestId = 0;
 
     // All target paths
     const ALL_GRADES = ['G1', 'G2', 'G3', 'G4', 'G5', 'G6', 'competition'];
@@ -947,6 +982,9 @@
     window.exportWordsCSV = exportWordsCSV;
     window.importWords = importWords;
     window.copyWordsToClipboard = copyWordsToClipboard;
+    window.backupAllWords = backupAllWords;
+    window.restoreAllWords = restoreAllWords;
+    window.loadWordBankOverview = loadWordBankOverview;
     window.startEdit = startEdit;
     window.saveEdit = saveEdit;
     window.cancelEdit = cancelEdit;
@@ -1000,7 +1038,49 @@
       });
 
       loadWords();
+      loadWordBankOverview();
     });
+
+    async function loadWordBankOverview() {
+      const container = document.getElementById('overviewContent');
+      container.innerHTML = '<div class="no-words">Loading overview...</div>';
+      try {
+        const snapshot = await get(ref(db, 'words'));
+        const allWords = snapshot.val() || {};
+        const types = ['primary', 'intermediate'];
+        const levels = ['level1', 'level2', 'level3', 'level4', 'level5', 'extraWords', 'extraWords2', 'extraWords3'];
+        const levelNames = ['L1', 'L2', 'L3', 'L4', 'L5', 'Extra', 'Extra 2', 'Extra 3'];
+        const table = document.createElement('table');
+        table.className = 'overview-table';
+        const thead = table.createTHead();
+        const header = thead.insertRow();
+        ['Target', ...types.flatMap(type => levelNames.map(level => `${type === 'primary' ? 'P' : 'I'} ${level}`)), 'Total'].forEach(label => {
+          const cell = document.createElement('th');
+          cell.textContent = label;
+          header.appendChild(cell);
+        });
+        const tbody = table.createTBody();
+        ALL_GRADES.forEach(target => {
+          const row = tbody.insertRow();
+          const name = row.insertCell();
+          name.textContent = target === 'competition' ? 'Competition' : target;
+          let total = 0;
+          types.forEach(type => levels.forEach(level => {
+            const words = allWords[target]?.[type]?.[level];
+            const count = Array.isArray(words) ? words.length : 0;
+            total += count;
+            const cell = row.insertCell();
+            cell.textContent = count;
+            cell.classList.toggle('empty-count', count === 0);
+          }));
+          row.insertCell().textContent = total;
+        });
+        container.replaceChildren(table);
+      } catch (error) {
+        console.error('Error loading overview:', error);
+        container.innerHTML = '<div class="no-words">Could not load the overview. Try again.</div>';
+      }
+    }
 
     function getBasePath() {
       const grade = document.getElementById('gradeSelect').value;
@@ -1015,8 +1095,10 @@
     }
 
     async function loadWords() {
+      const requestId = ++loadRequestId;
       updatePathDisplay();
       selectedWords.clear();
+      editingWord = null;
       document.getElementById('selectAllCheckbox').checked = false;
 
       const basePath = getBasePath();
@@ -1024,10 +1106,12 @@
 
       try {
         const snapshot = await get(wordsRef);
+        if (requestId !== loadRequestId) return;
         currentWords = snapshot.val() || [];
         filteredWords = [...currentWords];
         renderWordTable();
       } catch (error) {
+        if (requestId !== loadRequestId) return;
         console.error('Error loading words:', error);
         showToast('Error loading words', true);
         currentWords = [];
@@ -1132,7 +1216,8 @@
 
       if (syncAllEnabled) {
         // Add to all paths
-        await saveWordsToAllPaths([word]);
+        const saved = await saveWordsToAllPaths([word]);
+        if (!saved) return;
         input.value = '';
         showToast(`Added "${word}" to all grades!`);
         loadWords(); // Refresh current view
@@ -1142,7 +1227,8 @@
           return;
         }
         const newWords = [...currentWords, word];
-        await saveWords(newWords);
+        const saved = await saveWords(newWords);
+        if (!saved) return;
         input.value = '';
         showToast(`Added: ${word}`);
       }
@@ -1174,7 +1260,8 @@
 
       if (syncAllEnabled) {
         // Add to all paths
-        await saveWordsToAllPaths(uniqueWords);
+        const saved = await saveWordsToAllPaths(uniqueWords);
+        if (!saved) return;
         textarea.value = '';
         showToast(`Added ${uniqueWords.length} word${uniqueWords.length !== 1 ? 's' : ''} to all grades!`);
         loadWords(); // Refresh current view
@@ -1185,7 +1272,8 @@
           return;
         }
         const allWords = [...currentWords, ...newWords];
-        await saveWords(allWords);
+        const saved = await saveWords(allWords);
+        if (!saved) return;
         textarea.value = '';
         showToast(`Added ${newWords.length} word${newWords.length !== 1 ? 's' : ''}`);
       }
@@ -1216,19 +1304,22 @@
     }
 
     async function confirmDelete() {
+      const deleteCount = wordsToDelete.length;
       if (syncAllEnabled) {
         // Delete from all paths
-        await deleteWordsFromAllPaths(wordsToDelete);
+        const deleted = await deleteWordsFromAllPaths(wordsToDelete);
+        if (!deleted) return;
         selectedWords.clear();
         closeDeleteModal();
-        showToast(`Deleted ${wordsToDelete.length} word${wordsToDelete.length !== 1 ? 's' : ''} from all grades!`);
+        showToast(`Deleted ${deleteCount} word${deleteCount !== 1 ? 's' : ''} from all grades!`);
         loadWords(); // Refresh
       } else {
         const newWords = currentWords.filter(word => !wordsToDelete.includes(word));
-        await saveWords(newWords);
+        const deleted = await saveWords(newWords);
+        if (!deleted) return;
         selectedWords.clear();
         closeDeleteModal();
-        showToast(`Deleted ${wordsToDelete.length} word${wordsToDelete.length !== 1 ? 's' : ''}`);
+        showToast(`Deleted ${deleteCount} word${deleteCount !== 1 ? 's' : ''}`);
       }
     }
 
@@ -1250,10 +1341,13 @@
           await set(wordsRef, filteredWords);
         }
         hideProgress();
+        loadWordBankOverview();
+        return true;
       } catch (error) {
         console.error('Error deleting from all paths:', error);
         hideProgress();
         showToast('Error deleting from some paths', true);
+        return false;
       }
     }
 
@@ -1288,12 +1382,14 @@
 
       if (syncAllEnabled) {
         // Edit in all paths
-        await editWordInAllPaths(oldWord, newWord);
+        const saved = await editWordInAllPaths(oldWord, newWord);
+        if (!saved) return;
         showToast(`Updated "${oldWord}" → "${newWord}" in all grades!`);
         loadWords(); // Refresh
       } else {
         const newWords = currentWords.map(w => w === oldWord ? newWord : w);
-        await saveWords(newWords);
+        const saved = await saveWords(newWords);
+        if (!saved) return;
         showToast(`Updated: ${oldWord} → ${newWord}`);
       }
     }
@@ -1321,10 +1417,13 @@
           await set(wordsRef, uniqueWords);
         }
         hideProgress();
+        loadWordBankOverview();
+        return true;
       } catch (error) {
         console.error('Error editing in all paths:', error);
         hideProgress();
         showToast('Error updating some paths', true);
+        return false;
       }
     }
 
@@ -1343,9 +1442,12 @@
         currentWords = words;
         filteredWords = [...words];
         renderWordTable();
+        loadWordBankOverview();
+        return true;
       } catch (error) {
         console.error('Error saving words:', error);
         showToast('Error saving words', true);
+        return false;
       }
     }
 
@@ -1356,7 +1458,7 @@
         return;
       }
 
-      const content = currentWords.sort().join('\n');
+      const content = [...currentWords].sort().join('\n');
       const blob = new Blob([content], { type: 'text/plain' });
       const url = URL.createObjectURL(blob);
       
@@ -1376,7 +1478,8 @@
         return;
       }
 
-      const content = 'word\n' + currentWords.sort().join('\n');
+      const csvEscape = value => `"${String(value).replace(/"/g, '""')}"`;
+      const content = 'word\n' + [...currentWords].sort().map(csvEscape).join('\n');
       const blob = new Blob([content], { type: 'text/csv' });
       const url = URL.createObjectURL(blob);
       
@@ -1411,7 +1514,8 @@
 
         if (syncAllEnabled) {
           // Import to all paths
-          await saveWordsToAllPaths(uniqueWords);
+          const saved = await saveWordsToAllPaths(uniqueWords);
+          if (!saved) return;
           showToast(`Imported ${uniqueWords.length} word${uniqueWords.length !== 1 ? 's' : ''} to all grades!`);
           loadWords(); // Refresh current view
         } else {
@@ -1423,7 +1527,8 @@
           }
 
           const allWords = [...currentWords, ...newWords];
-          await saveWords(allWords);
+          const saved = await saveWords(allWords);
+          if (!saved) return;
           showToast(`Imported ${newWords.length} new word${newWords.length !== 1 ? 's' : ''}`);
         }
       };
@@ -1439,9 +1544,67 @@
         return;
       }
 
-      const text = currentWords.sort().join(', ');
-      await navigator.clipboard.writeText(text);
-      showToast('Words copied to clipboard');
+      const text = [...currentWords].sort().join(', ');
+      try {
+        await navigator.clipboard.writeText(text);
+        showToast('Words copied to clipboard');
+      } catch (error) {
+        console.error('Error copying words:', error);
+        showToast('Could not copy words', true);
+      }
+    }
+
+    async function backupAllWords() {
+      showProgress('Creating full word-bank backup...');
+      try {
+        const snapshot = await get(ref(db, 'words'));
+        const backup = {
+          format: 'spelling-bee-word-bank',
+          version: 1,
+          createdAt: new Date().toISOString(),
+          words: snapshot.val() || {}
+        };
+        const blob = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `spelling_words_backup_${backup.createdAt.slice(0, 10)}.json`;
+        link.click();
+        URL.revokeObjectURL(url);
+        hideProgress();
+        showToast('Full word-bank backup downloaded');
+      } catch (error) {
+        console.error('Error creating backup:', error);
+        hideProgress();
+        showToast('Could not create backup', true);
+      }
+    }
+
+    async function restoreAllWords(event) {
+      const input = event.target;
+      const file = input.files[0];
+      if (!file) return;
+
+      try {
+        const backup = JSON.parse(await file.text());
+        if (backup.format !== 'spelling-bee-word-bank' || backup.version !== 1 || !backup.words || typeof backup.words !== 'object' || Array.isArray(backup.words)) {
+          throw new Error('Unsupported backup format');
+        }
+        if (!confirm(`Restore all word banks from ${backup.createdAt || file.name}?\n\nCurrent word banks will be replaced. Competition/practice selection history will not be changed.`)) return;
+
+        showProgress('Restoring full word-bank backup...');
+        await set(ref(db, 'words'), backup.words);
+        hideProgress();
+        loadWordBankOverview();
+        showToast('Full word-bank backup restored');
+        await loadWords();
+      } catch (error) {
+        console.error('Error restoring backup:', error);
+        hideProgress();
+        showToast('Could not restore backup: invalid file or save error', true);
+      } finally {
+        input.value = '';
+      }
     }
 
     // Toggle Sync All
@@ -1495,6 +1658,7 @@
 
         await Promise.all(promises);
         hideProgress();
+        loadWordBankOverview();
         return true;
       } catch (error) {
         console.error('Error saving to all paths:', error);
@@ -1545,6 +1709,7 @@
         }
 
         hideProgress();
+        loadWordBankOverview();
         showToast(`Synced ${currentWords.length} words to all ${paths.length} paths!`);
       } catch (error) {
         console.error('Error syncing:', error);
@@ -1587,6 +1752,7 @@
         }
 
         hideProgress();
+        loadWordBankOverview();
         showToast(`Cleared all ${paths.length} paths`);
         loadWords(); // Refresh
       } catch (error) {
@@ -1623,4 +1789,3 @@
   </script>
 </body>
 </html>
-

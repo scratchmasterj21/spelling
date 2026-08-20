@@ -136,6 +136,58 @@
       animation: pulse 1.5s infinite;
     }
 
+    .live-badge.connected { background: rgba(46, 204, 113, 0.25); border-color: rgba(46, 204, 113, 0.55); }
+    .live-badge.connected .live-dot { background: #2ecc71; }
+    .live-badge.offline { background: rgba(127, 140, 141, 0.25); border-color: rgba(127, 140, 141, 0.55); }
+    .live-badge.offline .live-dot { background: #95a5a6; animation: none; }
+
+    .control-panel {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 10px;
+      margin: 0 0 20px;
+    }
+
+    .control-btn {
+      background: var(--btn-bg);
+      border: 1px solid var(--card-border);
+      color: var(--text-primary);
+      border-radius: 10px;
+      padding: 10px 16px;
+      font: inherit;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .control-btn:hover { background: var(--btn-hover); }
+    .control-btn:disabled, .generate-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+    .lock-status { color: var(--text-muted); align-self: center; font-size: 0.9rem; }
+
+    .history-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .history-item { background: var(--word-item-bg); padding: 8px 12px; border-radius: 10px; }
+    .history-empty { color: var(--text-muted); }
+
+    body.judge-mode .operator-only { display: none !important; }
+    body.judge-mode .selectors-row { display: none; }
+    body.judge-mode .header h1::after { content: ' — Judge View'; }
+
+    body.presentation-mode .top-bar,
+    body.presentation-mode .header,
+    body.presentation-mode .selectors-row,
+    body.presentation-mode .control-panel,
+    body.presentation-mode .word-count,
+    body.presentation-mode .word-list-section { display: none !important; }
+    body.presentation-mode .container { max-width: none; }
+    body.presentation-mode .word-display { min-height: 75vh; display: flex; flex-direction: column; justify-content: center; }
+    body.presentation-mode #randomWord { font-size: clamp(4rem, 12vw, 10rem); }
+
     @keyframes pulse {
       0%, 100% { opacity: 1; transform: scale(1); }
       50% { opacity: 0.5; transform: scale(1.2); }
@@ -454,11 +506,19 @@
     <header class="header">
       <h1>🏆 Competition Mode</h1>
       <p>Real-time synchronized word selection for all judges</p>
-      <div class="live-badge">
+      <div class="live-badge offline" id="connectionBadge">
         <div class="live-dot"></div>
-        <span>LIVE SYNC ACTIVE</span>
+        <span id="connectionText">CONNECTING...</span>
       </div>
     </header>
+
+    <div class="control-panel">
+      <button class="control-btn operator-only" onclick="startEvent()">▶ Start Event</button>
+      <button class="control-btn operator-only" onclick="toggleLevelLock()" id="lockButton">🔓 Lock Level</button>
+      <button class="control-btn operator-only" onclick="copyJudgeLink()">🔗 Copy Judge Link</button>
+      <button class="control-btn" onclick="togglePresentationMode()">⛶ Fullscreen</button>
+      <span class="lock-status operator-only" id="lockStatus">Level unlocked</span>
+    </div>
 
     <!-- Level Selectors -->
     <div class="selectors-row">
@@ -488,7 +548,7 @@
     <div class="word-display">
       <div class="current-selection" id="currentSelection">Competition • Primary • Level 1</div>
       <div id="randomWord">Waiting for word...</div>
-      <button class="generate-btn" onclick="generateRandomWord()">🎯 Select Next Word</button>
+      <button class="generate-btn operator-only" id="generateButton" onclick="generateRandomWord()">🎯 Select Next Word</button>
     </div>
 
     <!-- Word Count -->
@@ -517,8 +577,12 @@
     <div class="word-list-section">
       <div class="word-list-header">
         <span class="word-list-title" id="wordListTitle">Word List</span>
-        <button class="reset-btn" onclick="resetUsedWords()">🔄 Reset</button>
+        <div class="operator-only">
+          <button class="reset-btn" id="undoButton" onclick="undoLastSelection()">↩ Undo Last</button>
+          <button class="reset-btn" onclick="resetUsedWords()">🔄 Reset</button>
+        </div>
       </div>
+      <div class="history-list" id="historyList"><span class="history-empty">No words selected yet.</span></div>
       <div class="word-grid" id="wordGrid">
         <div class="loading">Loading words...</div>
       </div>
@@ -551,6 +615,16 @@
     let selectionCounts = {}; // Track how many times each word has been selected
     let unsubscribeWords = null;
     let unsubscribeUsed = null;
+    let unsubscribeConnection = null;
+    let levelLocked = false;
+    let isSaving = false;
+    let isConnected = false;
+    const query = new URLSearchParams(location.search);
+    const isJudgeMode = query.get('view') === 'judge';
+    const allowedTypes = ['primary', 'intermediate'];
+    const allowedLevels = ['level1', 'level2', 'level3', 'level4', 'level5', 'extraWords', 'extraWords2', 'extraWords3'];
+    if (allowedTypes.includes(query.get('type'))) selectedLevelType = query.get('type');
+    if (allowedLevels.includes(query.get('level'))) selectedLevel = query.get('level');
 
     // Enhanced random number generator using Crypto API
     function getSecureRandomIndex(max) {
@@ -568,6 +642,11 @@
     // Expose functions to window
     window.generateRandomWord = generateRandomWord;
     window.resetUsedWords = resetUsedWords;
+    window.undoLastSelection = undoLastSelection;
+    window.startEvent = startEvent;
+    window.toggleLevelLock = toggleLevelLock;
+    window.copyJudgeLink = copyJudgeLink;
+    window.togglePresentationMode = togglePresentationMode;
     window.toggleTheme = toggleTheme;
 
     // Theme management
@@ -604,15 +683,25 @@
 
     // Initialize
     document.addEventListener('DOMContentLoaded', () => {
+      document.body.classList.toggle('judge-mode', isJudgeMode);
+      syncActiveButtons();
       setupLevelTypeButtons();
       setupLevelButtons();
+      setupConnectionStatus();
+      setupKeyboardShortcuts();
       subscribeToData();
     });
+
+    function syncActiveButtons() {
+      document.querySelectorAll('#levelTypeButtons .pill-btn').forEach(button => button.classList.toggle('active', button.dataset.type === selectedLevelType));
+      document.querySelectorAll('#levelButtons .pill-btn').forEach(button => button.classList.toggle('active', button.dataset.level === selectedLevel));
+    }
 
     function setupLevelTypeButtons() {
       const buttons = document.querySelectorAll('#levelTypeButtons .pill-btn');
       buttons.forEach(btn => {
         btn.addEventListener('click', () => {
+          if (levelLocked) return alert('Unlock the level before changing it.');
           buttons.forEach(b => b.classList.remove('active'));
           btn.classList.add('active');
           selectedLevelType = btn.dataset.type;
@@ -625,6 +714,7 @@
       const buttons = document.querySelectorAll('#levelButtons .pill-btn');
       buttons.forEach(btn => {
         btn.addEventListener('click', () => {
+          if (levelLocked) return alert('Unlock the level before changing it.');
           buttons.forEach(b => b.classList.remove('active'));
           btn.classList.add('active');
           selectedLevel = btn.dataset.level;
@@ -653,6 +743,7 @@
         currentWords = snapshot.val() || [];
         updateWordGrid();
         updateWordCount();
+        markSynced();
       });
 
       // Subscribe to used words (real-time sync between all judges!)
@@ -667,6 +758,8 @@
         
         updateWordGrid();
         updateWordCount();
+        updateHistory();
+        markSynced();
         
         // Show latest word - this is the key sync feature!
         if (usedWords.length > 0) {
@@ -676,6 +769,43 @@
           document.getElementById('randomWord').textContent = 'Waiting for word...';
         }
       });
+    }
+
+    function setupConnectionStatus() {
+      unsubscribeConnection = onValue(ref(db, '.info/connected'), snapshot => {
+        const connected = snapshot.val() === true;
+        isConnected = connected;
+        const badge = document.getElementById('connectionBadge');
+        badge.classList.toggle('connected', connected);
+        badge.classList.toggle('offline', !connected);
+        document.getElementById('connectionText').textContent = connected ? 'CONNECTED' : 'OFFLINE';
+      });
+    }
+
+    function markSynced() {
+      if (isSaving || !isConnected) return;
+      const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+      document.getElementById('connectionText').textContent = `SYNCED ${time}`;
+    }
+
+    function updateHistory() {
+      const history = document.getElementById('historyList');
+      const recent = usedWords.slice(-8).reverse();
+      history.replaceChildren();
+      if (recent.length === 0) {
+        const empty = document.createElement('span');
+        empty.className = 'history-empty';
+        empty.textContent = 'No words selected yet.';
+        history.appendChild(empty);
+      } else {
+        recent.forEach((word, index) => {
+          const item = document.createElement('span');
+          item.className = 'history-item';
+          item.textContent = `${usedWords.length - index}. ${word}`;
+          history.appendChild(item);
+        });
+      }
+      document.getElementById('undoButton').disabled = recent.length === 0;
     }
 
     function updateSelectionDisplay() {
@@ -720,6 +850,8 @@
     }
 
     async function generateRandomWord() {
+      if (isJudgeMode || isSaving) return;
+      const button = document.getElementById('generateButton');
       if (currentWords.length === 0) {
         document.getElementById('randomWord').textContent = 'No words available!';
         return;
@@ -736,19 +868,133 @@
       const randomIndex = getSecureRandomIndex(remainingWords.length);
       const randomWord = remainingWords[randomIndex];
 
-      // Add to used words and sync to Firebase
-      // This will trigger onValue and update ALL connected judges!
-      const newUsedWords = [...usedWords, randomWord];
-      const basePath = getBasePath();
-      await set(ref(db, `sessions/${basePath}/usedWords`), newUsedWords);
-
-      hideDefinition();
+      button.disabled = true;
+      button.textContent = 'Saving...';
+      isSaving = true;
+      let saveSucceeded = false;
+      document.getElementById('connectionText').textContent = 'SAVING...';
+      try {
+        // Add to used words and sync to Firebase.
+        // This will trigger onValue and update all connected judges.
+        const newUsedWords = [...usedWords, randomWord];
+        const basePath = getBasePath();
+        await set(ref(db, `sessions/${basePath}/usedWords`), newUsedWords);
+        saveSucceeded = true;
+        hideDefinition();
+      } catch (error) {
+        console.error('Error selecting word:', error);
+        document.getElementById('randomWord').textContent = 'Could not save selection. Try again.';
+      } finally {
+        isSaving = false;
+        if (saveSucceeded) markSynced();
+        else document.getElementById('connectionText').textContent = 'SAVE FAILED';
+        button.disabled = false;
+        button.textContent = '🎯 Select Next Word';
+      }
     }
 
     async function resetUsedWords() {
+      if (isJudgeMode || isSaving) return;
+      if (!confirm('Reset all selected words for this competition level?\n\nJudges will immediately see the reset.')) return;
       const basePath = getBasePath();
-      await set(ref(db, `sessions/${basePath}/usedWords`), []);
-      hideDefinition();
+      try {
+        await set(ref(db, `sessions/${basePath}/usedWords`), []);
+        hideDefinition();
+      } catch (error) {
+        console.error('Error resetting words:', error);
+        document.getElementById('randomWord').textContent = 'Could not reset. Try again.';
+      }
+    }
+
+    async function undoLastSelection() {
+      if (isJudgeMode || isSaving || usedWords.length === 0) return;
+      const lastWord = usedWords[usedWords.length - 1];
+      if (!confirm(`Undo the last selection: “${lastWord}”?`)) return;
+      isSaving = true;
+      let saveSucceeded = false;
+      document.getElementById('connectionText').textContent = 'SAVING...';
+      try {
+        await set(ref(db, `sessions/${getBasePath()}/usedWords`), usedWords.slice(0, -1));
+        saveSucceeded = true;
+        hideDefinition();
+      } catch (error) {
+        console.error('Error undoing selection:', error);
+        alert('Could not undo the selection. Please try again.');
+      } finally {
+        isSaving = false;
+        if (saveSucceeded) markSynced();
+        else document.getElementById('connectionText').textContent = 'SAVE FAILED';
+      }
+    }
+
+    async function startEvent() {
+      if (isJudgeMode) return;
+      if (currentWords.length === 0) return alert('This level has no words. Add words before starting.');
+      if (!confirm(`Start ${selectedLevelType} ${selectedLevel} with ${currentWords.length} words?`)) return;
+      if (usedWords.length > 0 && confirm(`This level has ${usedWords.length} previous selection${usedWords.length === 1 ? '' : 's'}.\n\nReset them before starting?`)) {
+        try {
+          await set(ref(db, `sessions/${getBasePath()}/usedWords`), []);
+        } catch (error) {
+          console.error('Error preparing event:', error);
+          return alert('Could not reset the previous session. The event was not started.');
+        }
+      }
+      setLevelLocked(true);
+      alert('Event ready. The level is locked. Use “Copy Judge Link” for judge devices.');
+    }
+
+    function toggleLevelLock() {
+      setLevelLocked(!levelLocked);
+    }
+
+    function setLevelLocked(locked) {
+      levelLocked = locked;
+      document.querySelectorAll('.pill-btn').forEach(button => button.disabled = locked);
+      document.getElementById('lockButton').textContent = locked ? '🔒 Unlock Level' : '🔓 Lock Level';
+      document.getElementById('lockStatus').textContent = locked ? 'Level locked for event' : 'Level unlocked';
+    }
+
+    async function copyJudgeLink() {
+      const url = new URL(location.href);
+      url.search = '';
+      url.searchParams.set('view', 'judge');
+      url.searchParams.set('type', selectedLevelType);
+      url.searchParams.set('level', selectedLevel);
+      try {
+        await navigator.clipboard.writeText(url.toString());
+        alert('Judge link copied. It opens a read-only view of this level.');
+      } catch (error) {
+        prompt('Copy this judge link:', url.toString());
+      }
+    }
+
+    async function togglePresentationMode() {
+      document.body.classList.toggle('presentation-mode');
+      if (document.body.classList.contains('presentation-mode') && !document.fullscreenElement) {
+        try { await document.documentElement.requestFullscreen(); } catch (error) { console.info('Browser fullscreen unavailable:', error); }
+      } else if (!document.body.classList.contains('presentation-mode') && document.fullscreenElement) {
+        await document.exitFullscreen();
+      }
+    }
+
+    function setupKeyboardShortcuts() {
+      document.addEventListener('keydown', event => {
+        if (event.target.matches('input, textarea, select')) return;
+        const key = event.key.toLowerCase();
+        if ((key === ' ' || key === 'enter') && !isJudgeMode) {
+          event.preventDefault();
+          generateRandomWord();
+        } else if (key === 'd') {
+          document.getElementById('randomWord').click();
+        } else if (key === 'u' && !isJudgeMode) {
+          undoLastSelection();
+        } else if (key === 'f') {
+          togglePresentationMode();
+        } else if (key === 'escape') {
+          hideDefinition();
+          document.body.classList.remove('presentation-mode');
+        }
+      });
     }
 
     // Definition toggle
@@ -813,4 +1059,3 @@
   </script>
 </body>
 </html>
-

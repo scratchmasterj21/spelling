@@ -492,7 +492,7 @@
     <div class="word-display">
       <div class="current-selection" id="currentSelection">G1 • Primary • Level 1</div>
       <div id="randomWord">Click button to start</div>
-      <button class="generate-btn" onclick="generateRandomWord()">🎲 Select Random Word</button>
+      <button class="generate-btn" id="generateButton" onclick="generateRandomWord()">🎲 Select Random Word</button>
     </div>
 
     <!-- Word Count -->
@@ -555,6 +555,7 @@
     let usedWords = [];
     let selectionCounts = {}; // Track how many times each word has been selected
     let unsubscribe = null;
+    let loadRequestId = 0;
 
     // Enhanced random number generator using Crypto API
     function getSecureRandomIndex(max) {
@@ -676,7 +677,10 @@
     }
 
     async function loadWords() {
+      const requestId = ++loadRequestId;
       updateSelectionDisplay();
+      document.getElementById('randomWord').textContent = 'Loading words...';
+      hideDefinition();
       
       // Unsubscribe from previous listener
       if (unsubscribe) {
@@ -690,10 +694,12 @@
       try {
         // Load words
         const wordsSnapshot = await get(wordsRef);
+        if (requestId !== loadRequestId) return;
         currentWords = wordsSnapshot.val() || [];
         
         // Subscribe to used words changes
         unsubscribe = onValue(usedWordsRef, (snapshot) => {
+          if (requestId !== loadRequestId) return;
           usedWords = snapshot.val() || [];
           
           // Update selection counts
@@ -709,13 +715,18 @@
           if (usedWords.length > 0) {
             const latestWord = usedWords[usedWords.length - 1];
             document.getElementById('randomWord').textContent = latestWord;
+          } else {
+            document.getElementById('randomWord').textContent = 'Click button to start';
           }
         });
       } catch (error) {
+        if (requestId !== loadRequestId) return;
         console.error('Error loading words:', error);
         currentWords = [];
         usedWords = [];
         updateWordGrid();
+        updateWordCount();
+        document.getElementById('randomWord').textContent = 'Could not load words. Try again.';
       }
     }
 
@@ -761,6 +772,7 @@
     }
 
     async function generateRandomWord() {
+      const button = document.getElementById('generateButton');
       if (currentWords.length === 0) {
         document.getElementById('randomWord').textContent = 'No words available!';
         return;
@@ -779,13 +791,22 @@
 
       // Add to used words
       const newUsedWords = [...usedWords, randomWord];
-      
-      // Save to Firebase
-      const basePath = getBasePath();
-      await set(ref(db, `sessions/${basePath}/usedWords`), newUsedWords);
 
-      document.getElementById('randomWord').textContent = randomWord;
-      hideDefinition();
+      button.disabled = true;
+      button.textContent = 'Saving...';
+      try {
+        // Save to Firebase
+        const basePath = getBasePath();
+        await set(ref(db, `sessions/${basePath}/usedWords`), newUsedWords);
+        document.getElementById('randomWord').textContent = randomWord;
+        hideDefinition();
+      } catch (error) {
+        console.error('Error selecting word:', error);
+        document.getElementById('randomWord').textContent = 'Could not save selection. Try again.';
+      } finally {
+        button.disabled = false;
+        button.textContent = '🎲 Select Random Word';
+      }
     }
 
     async function resetUsedWords() {
@@ -857,4 +878,3 @@
   </script>
 </body>
 </html>
-

@@ -1,5 +1,7 @@
 # Spelling Bee Random Word Selector - Improvement Plan
 
+> Status note (August 2026): this is a historical brainstorming document. The deployed application lives in `public/`; the root-level `index.html` and `Spelling.html` are legacy files and are not deployed by Firebase or Cloudflare Pages. The system is used internally once a year, with one teacher selecting words and judges viewing the synchronized result. See `PRE_EVENT_CHECKLIST.md` for the current operating plan.
+
 ## 🔍 Current Implementation Analysis
 
 ### Current Random Selection Method
@@ -168,15 +170,24 @@ const randomWord = remainingWords[randomIndex];
 ## 📋 Implementation Priority
 
 ### Phase 1: Core Randomness Improvements (High Priority)
-1. ✅ Implement Fisher-Yates shuffle with crypto API
+1. ⏳ Implement Fisher-Yates shuffle with crypto API (crypto selection exists; Fisher-Yates does not)
 2. ✅ Add selection frequency tracking
 3. ✅ Display selection statistics in UI
 
 ### Phase 2: Enhanced Features (Medium Priority)
-4. ✅ Add selection history display
+4. ✅ Add recent selection history display
 5. ✅ Implement undo functionality
-6. ✅ Add "avoid recent words" option
-7. ✅ Add shuffle mode toggle
+6. ⏳ Add "avoid recent words" option
+7. ⏳ Add shuffle mode toggle
+
+### Annual Event Workflow (Implemented)
+
+- ✅ Separate operator controls and read-only judge links
+- ✅ Judge links preserve the selected competition level
+- ✅ Live connection, saving, failure, and synchronization status
+- ✅ Guided Start Event checks with optional previous-session reset
+- ✅ Level locking, presentation mode, and keyboard shortcuts
+- ✅ Full word-bank count overview in Manage Words
 
 ### Phase 3: Advanced Features (Lower Priority)
 8. ⏳ Word difficulty levels
@@ -305,4 +316,3 @@ function weightedRandomSelection(words, selectionCounts) {
 3. Do you need selection history persistence across sessions?
 4. Should there be different modes for practice vs competition?
 5. Do you want difficulty levels for words?
-
